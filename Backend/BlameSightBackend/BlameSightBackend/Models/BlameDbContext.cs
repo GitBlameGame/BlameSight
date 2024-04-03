@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlameSightBackend.Models;
 
-public partial class BlameGameContext : DbContext
+public partial class BlameDbContext : DbContext
 {
-    public BlameGameContext()
+    public BlameDbContext()
     {
     }
 
-    public BlameGameContext(DbContextOptions<BlameGameContext> options)
+    public BlameDbContext(DbContextOptions<BlameDbContext> options)
         : base(options)
     {
     }
