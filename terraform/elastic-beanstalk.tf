@@ -100,8 +100,8 @@ resource "aws_elastic_beanstalk_environment" "api_env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "ENDPOINT_URL"
-    value     = "jdbc:postgresql://${module.rds.db_instance_address}:5432/${local.db-name}"
+    name      = "DB_URL"
+    value     = module.rds.db_instance_address
   }
 }
 

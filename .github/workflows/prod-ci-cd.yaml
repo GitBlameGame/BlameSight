@@ -1,0 +1,26 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  checks: write
+  contents: write
+  id-token: write
+  security-events: write
+
+env:
+  terraform_directory: './terraform'
+
+jobs:
+  prod-ci:
+    name: "Prod CI"
+    uses: ./.github/workflows/prod-ci.yaml
+    secrets: inherit
+
+  terraform-apply:
+    name: "Terraform apply"
+    needs: prod-ci
+    secrets: inherit
+    uses: ./.github/workflows/terraform-cd.yaml
