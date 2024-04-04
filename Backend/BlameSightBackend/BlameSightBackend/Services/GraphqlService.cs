@@ -4,6 +4,34 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 
+/*
+
+The basic building blocks for a graphql query are fields.
+
+To create a query with this implementation you'll need to do the following:
+
+Create your GraphQL fields you would like to query, this includes nested ones (via the GraphObject):
+- eg Simple single field:
+      GraphField simple = new("firstname");
+- eg Attributed field (filtered):
+      Attributes attr = new();
+      attr.add("filtername", "filtervalue");
+      GraphField example = new("fieldname", attributes: attr)
+-eg Nested field:
+      GraphField nestedField = new("firstname");
+      GraphObject nestedObject = new([nestedField]);
+      Attributes attr = new();
+      attr.add("filtername", "filtervalue");
+      GraphField example = new("fieldname", attributes: attr, graphObject: nestedObject)
+
+
+Then simply create a GraphQuery class and add your fields to it:
+      GraphQuery query = new();
+      query.addField(example); // using the example field from above
+
+Now when the ToString method is called on the GraphQuery class you'll be able to pass it to the GraphQLClient.SendQueryAsync function.
+*/
+
 public class GraphQLClient
 {
     private readonly HttpClient _httpClient;
@@ -49,7 +77,7 @@ public class GraphField
     public override string ToString()
     {
         string result = name;
-        result += attributes == null ? "" : $"({ attributes })";
+        result += attributes == null ? "" : $"({attributes})";
         result += graphObject == null ? "" : $"{{ {graphObject} }}";
 
         return result;
@@ -69,7 +97,7 @@ public class GraphObject
     public override string ToString()
     {
         string result = string.Empty;
-        foreach(GraphField field in fields)
+        foreach (GraphField field in fields)
         {
             result += $"{field} \n";
         }
@@ -78,13 +106,13 @@ public class GraphObject
 
 }
 
-public class GraphQuery  
+public class GraphQuery
 {
     public List<GraphField>? fields;
 
     public GraphQuery() { }
 
-    public void addField(GraphField field)
+    public void add(GraphField field)
     {
         if (fields == null)
         {
@@ -142,10 +170,11 @@ public class Attributes
         this.keyValuePairs = keyValuePairs;
     }
 
-    public void addAttribute(string argument1, string argument2)
+    public void add(string filtername, string value)
     {
-        KeyValuePair<string, string> temp = new(argument1, argument2);
-        if(keyValuePairs != null){
+        KeyValuePair<string, string> temp = new(filtername, value);
+        if (keyValuePairs != null)
+        {
             keyValuePairs.Add(temp);
         }
         else
@@ -156,7 +185,8 @@ public class Attributes
     public override string ToString()
     {
         string result = "";
-        if(keyValuePairs != null){
+        if (keyValuePairs != null)
+        {
             foreach (KeyValuePair<string, string> item in keyValuePairs)
             {
                 result += $"{item.Key}:\"{item.Value}\",";
