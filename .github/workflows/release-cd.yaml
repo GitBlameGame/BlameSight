@@ -1,0 +1,98 @@
+name: Release CD
+
+on:
+  workflow_call: 
+
+permissions:
+  contents: write
+  security-events: write
+  id-token: write
+
+jobs:
+  # cli-release:
+  #   name: CLI Release
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout Repository
+  #     uses: actions/checkout@v4
+
+  #   - name: Configure AWS Credentials
+  #     uses: aws-actions/configure-aws-credentials@v4
+  #     with:
+  #       role-to-assume: ${{secrets.AWS_ASSUME_ROLE}}
+  #       aws-region: "eu-west-1"
+  #       role-session-name: GitHub_to_AWS_via_FederatedOIDC
+
+  #   - name: Setup .NET
+  #     uses: actions/setup-dotnet@v4
+  #     with:
+  #       dotnet-version: 8.0.x
+    
+  #     # PACKAGING
+  
+  #   - uses: cb80/delrel@latest
+  #     with:
+  #       tag: latest
+  #       token: ${{ secrets.GITHUB_TOKEN }}
+
+  #   - name: Create release
+  #     id: create_release
+  #     uses: actions/create-release@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     with:
+  #       tag_name: latest
+  #       release_name: cli
+  #       body: |
+  #         Packaged CLI
+  #       draft: false
+  #       prerelease: false
+
+  #   - name: Upload release asset (Windows)
+  #     id: upload-release-asset-win 
+  #     uses: actions/upload-release-asset@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     with:
+  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
+  #       asset_path: XXX
+  #       asset_name: cli-windows-x64.zip
+  #       asset_content_type: application/zip
+
+
+  api-deploy:
+    name: API Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{secrets.AWS_ASSUME_ROLE}}
+        aws-region: "eu-west-1"
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Publish API
+      working-directory: ./Backend/BlameSightBackend
+      run: dotnet publish -c Release --output ../../release/api
+
+    - name: Create ZIP Package
+      working-directory: ./release
+      run: zip -r deploy_package.zip .
+
+    - name: Upload API Package
+      working-directory: ./release
+      run: aws s3 cp deploy_package.zip s3://263883060207-deploy-bucket
+
+    - name: Create New API Version
+      run: aws elasticbeanstalk create-application-version --application-name api-app --source-bundle S3Bucket="263883060207-deploy-bucket",S3Key="deploy_package.zip" --version-label "deploy-${{ github.sha }}" --description "commit-sha-${{ github.sha }}"
+
+    - name: Deploy API
+      run: aws elasticbeanstalk update-environment --environment-name api-env --version-label "deploy-${{ github.sha }}"
