@@ -24,3 +24,9 @@ jobs:
     needs: prod-ci
     secrets: inherit
     uses: ./.github/workflows/terraform-cd.yaml
+
+  database-migration:
+    name: "Liquibase update"
+    needs: terraform-apply
+    secrets: inherit
+    uses: ./.github/workflows/liquibase-cd.yaml  

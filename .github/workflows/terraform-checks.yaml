@@ -22,7 +22,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3.0.0
 
       - name: "Terraform fmt"
-        working-directory: ${{env.terraform_directory}}
+        working-directory: ${{ env.terraform_directory }}
         run: |
           terraform fmt -check --recursive .
         continue-on-error: false
@@ -30,7 +30,7 @@ jobs:
       # - name: "Terraform security check"
       #   uses: aquasecurity/tfsec-action@v1.0.3
       #   with:
-      #     working_directory: ${{env.terraform_directory}}
+      #     working_directory: ${{ env.terraform_directory }}
 
       - name: "Setup tflint"
         uses: terraform-linters/setup-tflint@v4.0.0
