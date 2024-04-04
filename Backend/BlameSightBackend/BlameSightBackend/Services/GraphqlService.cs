@@ -142,23 +142,6 @@ public class GraphQuery
     }
 }
 
-public class AttributedName
-{
-    public string name { get; set; }
-    public Attributes attributes { get; set; }
-
-    public AttributedName(string name, Attributes attr)
-    {
-        this.name = name;
-        this.attributes = attr;
-    }
-
-    public override string ToString()
-    {
-        return $"{name}({attributes.ToString()})";
-    }
-}
-
 
 public class Attributes
 {
