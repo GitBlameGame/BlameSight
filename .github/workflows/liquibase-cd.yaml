@@ -1,0 +1,43 @@
+name: Database change CD
+
+on:
+  workflow_call:
+
+permissions:
+  checks: write
+  contents: read
+  id-token: write
+
+jobs:
+  migrate_db:
+    name: Migrate DB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the repo
+        uses: actions/checkout@main
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}
+          aws-region: "eu-west-1"
+          role-session-name: Liquibase_CD_GitHub_to_AWS_via_FederatedOIDC
+
+      - name: Get DB credentials
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.1
+        with:
+          secret-ids: |
+            DB_DETAILS, rds*
+          parse-json-secrets: true
+
+      - name: Fetch AWS RDS endpoint
+        run: |
+          echo "DB_ENDPOINT=$(aws rds describe-db-instances --db-instance-identifier blamesightdb --query 'DBInstances[0].Endpoint.Address' --output text)" >> $GITHUB_ENV
+    
+      - name: Perform migration
+        uses: liquibase-github-actions/update@v4.26.0
+        with:
+          changelogFile: "./database/changelog.yaml"
+          url: "jdbc:postgresql://${{ env.DB_ENDPOINT }}:5432/blamesightdb"
+          password: "${{ env.DB_DETAILS_PASSWORD }}"
+          username: "${{ env.DB_DETAILS_USERNAME }}"
