@@ -7,7 +7,7 @@
             "parameters": {
                 "appBundle": "./api",
                 "iisPath": "/",
-                "iisWebSite": "BlameSightBackend API"
+                "iisWebSite": "Default Web Site"
             }
         }
         ]
