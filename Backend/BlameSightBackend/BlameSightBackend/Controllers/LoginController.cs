@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿using BlameSightBackend.Models;
+using BlameSightBackend.Services;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,10 +13,11 @@ namespace BlameSightBackend.Controllers
 {
     [Route("api/login")]
     [ApiController]
-    public class LoginController(IConfiguration config, IHttpClientFactory httpClientFactory) : ControllerBase
+    public class LoginController(IConfiguration config, IHttpClientFactory httpClientFactory, UserService userService) : ControllerBase
     {
         private IConfiguration _config = config;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+        private readonly UserService _userService=userService;
 
 
         [HttpGet]
@@ -33,7 +37,7 @@ namespace BlameSightBackend.Controllers
                 new Claim("Name",user),
                 new Claim("Token", Authorization)
             };
-
+            var userID= _userService.GetOrAddUserDB(user);
             var key = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? "";
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -45,7 +49,7 @@ namespace BlameSightBackend.Controllers
               signingCredentials: credentials);
 
             var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
-
+            userID.Wait();
             return Ok(token);
         }
 
@@ -68,5 +72,6 @@ namespace BlameSightBackend.Controllers
             else { return null; }
 
         }
+       
     }
 }

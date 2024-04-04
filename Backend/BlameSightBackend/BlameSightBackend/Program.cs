@@ -1,6 +1,8 @@
 
+using BlameSightBackend.Models;
+using BlameSightBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using System.Net.Http;
@@ -33,7 +35,7 @@ builder.Services.AddAuthentication(x =>
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddDbContext<BeanstalkDbContext>(options => options.UseSqlServer(config.GetConnectionString("DBConnectionString")));
+builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(config.GetConnectionString("DBConnectionString")));
 builder.Services.AddHttpClient("GitHub", httpClient =>
 {
     httpClient.BaseAddress = new Uri("https://api.github.com/");
@@ -42,6 +44,7 @@ builder.Services.AddHttpClient("GitHub", httpClient =>
     httpClient.DefaultRequestHeaders.Add("User-Agent", "BBDBLAME");
 
 });
+builder.Services.AddScoped<UserService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
