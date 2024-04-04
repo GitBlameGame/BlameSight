@@ -81,16 +81,15 @@ jobs:
 
     - name: Publish API
       working-directory: ./Backend/BlameSightBackend
-      run: dotnet publish -c Release --output ../../release/api
+      run: dotnet publish -c Release --output ../../bundle/api
 
     - name: Create ZIP Package
-      working-directory: ./release
+      working-directory: ./bundle
       run: |
         zip -r deploy_package.zip .
-        zip -u deploy_package.zip aws-windows-deployment-manifest.json
 
     - name: Upload API Package
-      working-directory: ./release
+      working-directory: ./bundle
       run: aws s3 cp deploy_package.zip s3://263883060207-deploy-bucket
 
     - name: Create New API Version
