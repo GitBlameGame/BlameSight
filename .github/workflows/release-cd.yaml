@@ -85,7 +85,9 @@ jobs:
 
     - name: Create ZIP Package
       working-directory: ./release
-      run: zip -r deploy_package.zip .
+      run: |
+        zip -r deploy_package.zip .
+        zip -u deploy_package.zip aws-windows-deployment-manifest.json
 
     - name: Upload API Package
       working-directory: ./release
