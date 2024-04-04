@@ -30,3 +30,9 @@ jobs:
     needs: terraform-apply
     secrets: inherit
     uses: ./.github/workflows/liquibase-cd.yaml  
+
+  release-cd:
+    name: "Deploy/Release API and CLI"
+    needs: database-migration
+    secrets: inherit
+    uses: ./.github/workflows/release-cd.yaml  
