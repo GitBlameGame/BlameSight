@@ -1,5 +1,6 @@
 
 using BlameSightBackend.Models;
+using BlameSightBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -43,6 +44,7 @@ builder.Services.AddHttpClient("GitHub", httpClient =>
     httpClient.DefaultRequestHeaders.Add("User-Agent", "BBDBLAME");
 
 });
+builder.Services.AddScoped<UserService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
