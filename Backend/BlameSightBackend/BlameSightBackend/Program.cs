@@ -37,8 +37,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 Console.WriteLine(ConnectionStringBuilder.getConnectionString());
-builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(config.GetConnectionString("DBConnectionString")));
-//builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(ConnectionStringBuilder.getConnectionString()));
+//builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(config.GetConnectionString("DBConnectionString")));
+builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(ConnectionStringBuilder.getConnectionString()));
 builder.Services.AddHttpClient("GitHub", httpClient =>
 {
     httpClient.BaseAddress = new Uri("https://api.github.com/");
