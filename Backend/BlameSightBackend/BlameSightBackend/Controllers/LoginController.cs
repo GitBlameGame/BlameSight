@@ -30,7 +30,7 @@ namespace BlameSightBackend.Controllers
 
             if (user == null)
             {
-                return BadRequest("Token invalid");
+                return Unauthorized("Token invalid");
             }
             var claims = new List<Claim>
             {
