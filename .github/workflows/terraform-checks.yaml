@@ -1,0 +1,43 @@
+name: "Terraform Checks"
+
+on:
+  workflow_call:
+
+permissions:
+  checks: write
+  contents: read
+
+env:
+  terraform_directory: "./terraform"
+
+jobs:
+  terraform-checks:
+    name: 'Terraform checks'
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@main
+
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v3.0.0
+
+      - name: "Terraform fmt"
+        working-directory: ${{ env.terraform_directory }}
+        run: |
+          terraform fmt -check --recursive .
+        continue-on-error: false
+
+      # - name: "Terraform security check"
+      #   uses: aquasecurity/tfsec-action@v1.0.3
+      #   with:
+      #     working_directory: ${{ env.terraform_directory }}
+
+      - name: "Setup tflint"
+        uses: terraform-linters/setup-tflint@v4.0.0
+        with:
+          tflint_version: latest
+      
+      - name: "Run tflint"
+        working-directory: ${{env.terraform_directory}}
+        run: |
+          tflint -f compact
