@@ -21,6 +21,7 @@ namespace BlameSightBackend.Controllers
         private readonly RepoService _repoService = repoService;
         private readonly BlameService _blameService = blameService;
         [HttpPut]
+        [Route("newBlame")]
         public async Task<IActionResult> newBlame([FromBody] newBlame blameInput)
         {
             var blamer = JWTService.GetUsername(HttpContext);
