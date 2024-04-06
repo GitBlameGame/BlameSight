@@ -19,9 +19,9 @@ public partial class BlameDbContext : DbContext
 
     public virtual DbSet<Repo> Repos { get; set; }
 
-    public virtual DbSet<Repoowner> Repoowners { get; set; }
+    public virtual DbSet<Repoowner> RepoOwners { get; set; }
 
-    public virtual DbSet<Urgencydescriptor> Urgencydescriptors { get; set; }
+    public virtual DbSet<Urgencydescriptor> UrgencyDescriptors { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
