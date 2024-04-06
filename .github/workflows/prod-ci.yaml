@@ -30,8 +30,8 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/liquibase-ci.yaml
 
-  # release-ci:
-  #   name: "API/CLI checks"
-  #   secrets: inherit
-  #   uses: ./.github/workflows/release-ci.yaml
+  release-ci:
+    name: "API/CLI checks"
+    secrets: inherit
+    uses: ./.github/workflows/release-ci.yaml
   
