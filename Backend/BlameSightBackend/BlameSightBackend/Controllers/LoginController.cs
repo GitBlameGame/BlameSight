@@ -53,7 +53,7 @@ namespace BlameSightBackend.Controllers
             return Ok(token);
         }
 
-        public async Task<string> GetUserNameFromGithub(string token)
+        private async Task<string> GetUserNameFromGithub(string token)
         {
 
             var httpClient = _httpClientFactory.CreateClient("GitHub");

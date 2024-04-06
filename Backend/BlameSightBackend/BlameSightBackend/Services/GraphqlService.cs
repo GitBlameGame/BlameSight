@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 /*
 
@@ -44,7 +45,13 @@ public class GraphQLClient
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
         _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AppName", "1.0"));
     }
-
+    public GraphQLClient(String token)
+    {
+        _graphqlEndpoint = "https://api.github.com/graphql";
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
+        _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AppName", "1.0"));
+    }
     public async Task<string> SendQueryAsync(string query)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, _graphqlEndpoint);

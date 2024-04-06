@@ -1,6 +1,6 @@
 
 using BlameSightBackend;
-using BlameSightBackend.Models;
+using BlameSightBackend.Models.Db;
 using BlameSightBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
