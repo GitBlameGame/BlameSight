@@ -35,9 +35,23 @@ namespace BlameSightBackend.Controllers
             var client = new GraphQLClient(token);
             var query = client.generateBlameQL(blameInput);
             var response = await client.SendQueryAsync(query.ToString());
-            if (response.Contains("NOT_FOUND"))
+            return Ok(response);
+            if(response.Contains("Bad credentials") || response.Contains("Token expired"))
             {
-                return NotFound($"Could not resolve a repository with the name: {blameInput.Path}");
+                return Unauthorized("Token is invalid, please login with Github again");
+            }
+           else if (response.Contains("\"ranges\":[]"))
+            {
+                return NotFound($"File not found on specified path: {blameInput.Path}");
+            }
+            else if (response.Contains("\"object\":null"))
+            {
+                return NotFound($"Branch {blameInput.Branch} cannot be resolved");
+            }
+            else if (response.Contains("NOT_FOUND"))
+            {
+                return NotFound($"Could not resolve a repository with the name: {blameInput.Path}\n" +
+                    $"Please double-check the repository name for accuracy or verify that you have the necessary permissions to access it.");
             }
             var authorName = getBlamed(response, blameInput.LineNum);
 
@@ -45,7 +59,7 @@ namespace BlameSightBackend.Controllers
             {
                 return BadRequest("Line number is not valid");
             };
-            return Ok(authorName);
+            return Ok($"{authorName} was successfully blamed");
         }
 
         public string getBlamed(string response, int lineNum)

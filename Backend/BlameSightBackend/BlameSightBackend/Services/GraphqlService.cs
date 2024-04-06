@@ -81,7 +81,7 @@ public class GraphQLClient
         GraphField blame = new GraphField("blame", pathAt, graphObject: new([ranges]));
         var onCommit = new GraphField("... on Commit", graphObject: new([blame]));
         Attributes expressionAt = new();
-        expressionAt.add("expression", "main");
+        expressionAt.add("expression", blameInput.Branch);
         GraphField objectGf = new GraphField("object", expressionAt, graphObject: new([onCommit]));
         Attributes repoAt = new();
         repoAt.add("owner", repositoryOwner);
