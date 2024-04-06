@@ -1,4 +1,4 @@
-﻿using BlameSightBackend.Models;
+﻿using BlameSightBackend.Models.Db;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

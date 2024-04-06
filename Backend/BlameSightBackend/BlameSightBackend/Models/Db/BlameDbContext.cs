@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlameSightBackend.Models;
+namespace BlameSightBackend.Models.Db;
 
 public partial class BlameDbContext : DbContext
 {
@@ -19,15 +19,11 @@ public partial class BlameDbContext : DbContext
 
     public virtual DbSet<Repo> Repos { get; set; }
 
-    public virtual DbSet<Repoowner> Repoowners { get; set; }
+    public virtual DbSet<Repoowner> RepoOwners { get; set; }
 
-    public virtual DbSet<Urgencydescriptor> Urgencydescriptors { get; set; }
+    public virtual DbSet<Urgencydescriptor> UrgencyDescriptors { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=BlameGame;Username=postgres;Password=XS4Us7b79Qcu7kodm");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

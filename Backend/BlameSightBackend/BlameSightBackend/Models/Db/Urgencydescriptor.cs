@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlameSightBackend.Models;
+namespace BlameSightBackend.Models.Db;
 
 [Table("urgencydescriptors")]
 public partial class Urgencydescriptor

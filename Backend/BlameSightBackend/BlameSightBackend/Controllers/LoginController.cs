@@ -30,7 +30,7 @@ namespace BlameSightBackend.Controllers
 
             if (user == null)
             {
-                return BadRequest("Token invalid");
+                return Unauthorized("Token invalid");
             }
             var claims = new List<Claim>
             {
@@ -53,7 +53,7 @@ namespace BlameSightBackend.Controllers
             return Ok(token);
         }
 
-        public async Task<string> GetUserNameFromGithub(string token)
+        private async Task<string> GetUserNameFromGithub(string token)
         {
 
             var httpClient = _httpClientFactory.CreateClient("GitHub");

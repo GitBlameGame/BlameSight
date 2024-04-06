@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlameSightBackend.Models;
+namespace BlameSightBackend.Models.Db;
 
 [Table("repos")]
 public partial class Repo
@@ -14,7 +14,7 @@ public partial class Repo
     public int RepoId { get; set; }
 
     [Column("repo_owner_id")]
-    public int? RepoOwnerId { get; set; }
+    public int RepoOwnerId { get; set; }
 
     [Column("repo_name")]
     [StringLength(1000)]
@@ -25,5 +25,5 @@ public partial class Repo
 
     [ForeignKey("RepoOwnerId")]
     [InverseProperty("Repos")]
-    public virtual Repoowner? RepoOwner { get; set; }
+    public virtual Repoowner RepoOwner { get; set; }
 }
