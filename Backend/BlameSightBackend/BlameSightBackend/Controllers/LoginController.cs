@@ -37,8 +37,8 @@ namespace BlameSightBackend.Controllers
                 new Claim("Name",user),
                 new Claim("Token", Authorization)
             };
-            var userID= _userService.GetOrAddUserDB(user);
-            var key = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? "";
+/*            var userID= _userService.GetOrAddUserDB(user);
+*/            var key = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? "";
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -49,8 +49,8 @@ namespace BlameSightBackend.Controllers
               signingCredentials: credentials);
 
             var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
-            userID.Wait();
-            return Ok(token);
+/*            userID.Wait();
+*/            return Ok(token);
         }
 
         public async Task<string> GetUserNameFromGithub(string token)
