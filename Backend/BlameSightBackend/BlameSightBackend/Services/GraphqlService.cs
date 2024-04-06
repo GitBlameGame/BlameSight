@@ -1,3 +1,4 @@
+using BlameSightBackend.Models;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -65,5 +66,29 @@ public class GraphQLClient
         {
             throw new HttpRequestException($"GraphQL request failed with status code {(int)response.StatusCode} - {response.ReasonPhrase}");
         }
+    }
+    public string generateBlameQL(newBlame blameInput)
+    {
+        var segments = blameInput.Path.TrimStart('/').Split('/');
+        var repositoryOwner = segments.Length > 0 ? segments[0] : string.Empty;
+        var repositoryName = segments.Length > 1 ? segments[1] : string.Empty;
+        var filePath = segments.Length > 2 ? string.Join("/", segments.Skip(2)) : string.Empty;
+        var author = new GraphField("author", graphObject: new([new GraphField("name")]));
+        var commit = new GraphField("commit", graphObject: new([author]));
+        var ranges = new GraphField("ranges", graphObject: new([new GraphField("startingLine"), new GraphField("endingLine"), commit]));
+        Attributes pathAt = new();
+        pathAt.add("path", filePath);
+        GraphField blame = new GraphField("blame", pathAt, graphObject: new([ranges]));
+        var onCommit = new GraphField("... on Commit", graphObject: new([blame]));
+        Attributes expressionAt = new();
+        expressionAt.add("expression", "main");
+        GraphField objectGf = new GraphField("object", expressionAt, graphObject: new([onCommit]));
+        Attributes repoAt = new();
+        repoAt.add("owner", repositoryOwner);
+        repoAt.add("name", repositoryName);
+        GraphField graphField = new GraphField("repository", repoAt, graphObject: new([objectGf]));
+        GraphQuery query = new();
+        query.add(graphField);
+        return query.ToString();
     }
 }

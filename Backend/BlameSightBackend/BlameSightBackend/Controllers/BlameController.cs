@@ -31,65 +31,35 @@ namespace BlameSightBackend.Controllers
             {
                 return BadRequest("Path is not in the correct format\nowner/repo/pathtofile");
             }
-            var segments = blameInput.Path.TrimStart('/').Split('/');
-                // Extract the repository owner, repository name, and path to file
-                var repositoryOwner = segments.Length > 0 ? segments[0] : string.Empty;
-                var repositoryName = segments.Length > 1 ? segments[1] : string.Empty;
-                var filePath = segments.Length > 2 ? string.Join("/", segments.Skip(2)) : string.Empty;
-
-
-
-
-            /*  Attributes ghattr = new();
-              ghattr.add("owner", "Luke-Bradford489");
-              ghattr.add("name", "SudokuSolver-Genetic_Algorithm");
-
-              GraphObject ghobject = new([new GraphField("name"), new GraphField("url")]);
-              GraphField ghfield = new("repository", attributes: ghattr, graphObject: ghobject);
-
-              GraphQuery query2 = new();*/
-            Attributes ghattr = new();
-            ghattr.add("owner", repositoryOwner);
-            ghattr.add("name", repositoryName);
-
-            // Add the branch and file path as attributes
-            ghattr.add("path", $"main:{filePath}");
-
-            // Define the blame range fields
-            GraphObject blameRangeObject = new([new GraphField("startingLine"), new GraphField("endingLine"), new GraphField("commit" ,graphObject:
-                new GraphObject([new GraphField("author", graphObject: new([new GraphField("name")]))])) ] );
-
-            GraphField ghfield = new("repository", attributes: ghattr, graphObject: blameRangeObject);
-            GraphQuery query = new();
-            query.add(ghfield);
-            Console.WriteLine(query.ToString());
+       
             var client = new GraphQLClient(token);
+            var query = client.generateBlameQL(blameInput);
             var response = await client.SendQueryAsync(query.ToString());
+            if (response.Contains("NOT_FOUND"))
+            {
+                return NotFound($"Could not resolve a repository with the name: {blameInput.Path}");
+            }
+            var authorName = getBlamed(response, blameInput.LineNum);
 
+            if (authorName == null)
+            {
+                return BadRequest("Line number is not valid");
+            };
+            return Ok(authorName);
+        }
 
-            // Define the blame field
-            /*GraphField blameField = new("blame", attributes: new Attributes().add("path", "path/to/file"), graphObject: blameRangeObject);
+        public string getBlamed(string response, int lineNum)
+        {
+            using JsonDocument doc = JsonDocument.Parse(response);
+            JsonElement root = doc.RootElement;
 
-            // Add the blame field to the repository object
+            JsonElement extract = root.GetProperty("data").GetProperty("repository").GetProperty("object").GetProperty("blame").GetProperty("ranges");
 
-            GraphField ghfield = new("repository", attributes: ghattr, graphObject: ghobject);
-
-            GraphQuery query2 = new();
-            query2.add(ghfield);
-
-            Console.WriteLine("\n\n-----------------------------");
-
-            Console.WriteLine("Actual query: " + query2);
-
-
-            var client = new GraphQLClient( token);
-            // Uses the query taken directly from a GraphQL explorer payload
-            // Uses a query made using code
-            var response2 = await client.SendQueryAsync(query2.ToString());
-            Console.WriteLine("\n\n-----------------------------");
-
-            Console.WriteLine(response2);*/
-            return Ok(response);
+            var authorName = extract.EnumerateArray()
+                .Where(extract => extract.GetProperty("startingLine").GetInt32() <= lineNum && extract.GetProperty("endingLine").GetInt32() >= lineNum)
+                .Select(extract => extract.GetProperty("commit").GetProperty("author").GetProperty("name").GetString())
+                .FirstOrDefault();
+            return authorName;
         }
     }
 }
