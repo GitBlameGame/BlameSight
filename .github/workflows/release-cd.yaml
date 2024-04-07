@@ -68,7 +68,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Frontend/BlameSightFrontend/BlameSightFrontend/bin/Release/net8.0/win-x64/publish/cli-windows-x64.zip
+        asset_path: ./Frontend/BlameSightFrontend/cli-windows-x64.zip
         asset_name: cli-windows-x64.zip
         asset_content_type: application/zip
 
@@ -79,7 +79,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Frontend/BlameSightFrontend/BlameSightFrontend/bin/Release/net8.0/linux-x64/publish/cli-linux-x64.zip
+        asset_path: ./Frontend/BlameSightFrontend/cli-linux-x64.zip
         asset_name: cli-linux-x64.zip
         asset_content_type: application/zip
 
@@ -90,7 +90,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Frontend/BlameSightFrontend/BlameSightFrontend/bin/Release/net8.0/osx-x64/publish/cli-osx-x64.zip
+        asset_path: ./Frontend/BlameSightFrontend/cli-osx-x64.zip
         asset_name: cli-osx-x64.zip
         asset_content_type: application/zip
 
