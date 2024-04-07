@@ -1,12 +1,9 @@
 ﻿using DiscordBot.Services;
 
-DiscordClient client = new("");
+string token =  Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
+DiscordClient client = new(token);
 
 await client.start();
-
-
-
-//"/channels/{channel.id}/messages"
 
 
 
