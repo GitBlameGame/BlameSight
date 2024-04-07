@@ -31,14 +31,17 @@ namespace BlameSightBackend.Controllers
             {
                 return Unauthorized("JWT Invalid, please login again");
             }
-
+            if(blameInput.Comment.Length>256)
+            { 
+                return BadRequest("Blame Comment cannot exceed 256 characters. Please try to make your point concise.");
+            }
             if (blameInput.Path.Count(f => f == '/') < 2)
             {
                 return BadRequest("Path is not in the correct format\nowner/repo/pathtofile");
             }
             if (blameInput.Urgency < 1 || blameInput.Urgency > 5)
             {
-                return BadRequest("Urgency must be 1 to 5");
+                return BadRequest("Urgency level must be between 1 and 5.");
             }
             var client = new GraphQLClient(token);
             var query = client.generateBlameQL(blameInput);
@@ -87,7 +90,7 @@ namespace BlameSightBackend.Controllers
             return Ok($"{authorName} was successfully blamed");
         }
 
-        public string getBlamed(string response, int lineNum)
+        private string getBlamed(string response, int lineNum)
         {
             using JsonDocument doc = JsonDocument.Parse(response);
             JsonElement root = doc.RootElement;
