@@ -39,9 +39,9 @@ jobs:
         dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true -c Release
         dotnet publish -r linux-x64 -p:PublishSingleFile=true --self-contained true -c Release
         dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained true -c Release
-        zip -r cli-windows-x64.zip ./BlameSightFrontend/bin/Release/net8.0/win-x64/publish/*
-        zip -r cli-linux-x64.zip ./BlameSightFrontend/bin/Release/net8.0/linux-x64/publish/*
-        zip -r cli-osx-x64.zip ./BlameSightFrontend/bin/Release/net8.0/osx-x64/publish/*
+        zip -r -j cli-windows-x64.zip ./BlameSightFrontend/bin/Release/net8.0/win-x64/publish/*
+        zip -r -j cli-linux-x64.zip ./BlameSightFrontend/bin/Release/net8.0/linux-x64/publish/*
+        zip -r -j cli-osx-x64.zip ./BlameSightFrontend/bin/Release/net8.0/osx-x64/publish/*
     
     - uses: cb80/delrel@latest
       with:
