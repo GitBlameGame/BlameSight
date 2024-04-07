@@ -2,6 +2,7 @@ name: Release CD
 
 on:
   workflow_call: 
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -9,55 +10,89 @@ permissions:
   id-token: write
 
 jobs:
-  # cli-release:
-  #   name: CLI Release
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout Repository
-  #     uses: actions/checkout@v4
+  cli-release:
+    name: CLI Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-  #   - name: Configure AWS Credentials
-  #     uses: aws-actions/configure-aws-credentials@v4
-  #     with:
-  #       role-to-assume: ${{secrets.AWS_ASSUME_ROLE}}
-  #       aws-region: "eu-west-1"
-  #       role-session-name: GitHub_to_AWS_via_FederatedOIDC
-
-  #   - name: Setup .NET
-  #     uses: actions/setup-dotnet@v4
-  #     with:
-  #       dotnet-version: 8.0.x
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}
+        aws-region: "eu-west-1"
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC
     
-  #     # PACKAGING
-  
-  #   - uses: cb80/delrel@latest
-  #     with:
-  #       tag: latest
-  #       token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Get API Endpoint
+      run: |
+        echo "API_ENDPOINT=$(aws elasticbeanstalk describe-environments --environment-names api-env --query "Environments[*].CNAME" --output text)" >> $GITHUB_ENV
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Create self-contained releases
+      working-directory: ./Frontend/BlameSightFrontend
+      run: |
+        dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true -c Release
+        dotnet publish -r linux-x64 -p:PublishSingleFile=true --self-contained true -c Release
+        dotnet publish -r osx-x64 -p:PublishSingleFile=true --self-contained true -c Release
+        zip -r cli-windows-x64.zip ./Frontend/BlameSightFrontend/BlameSightFrontend/bin/Release/net8.0/win-x64/publish/*
+        zip -r cli-linux-x64.zip ./Frontend/BlameSightFrontend/BlameSightFrontend/bin/Release/net8.0/linux-x64/publish/*
+        zip -r cli-osx-x64.zip ./Frontend/BlameSightFrontend/BlameSightFrontend/bin/Release/net8.0/osx-x64/publish/*
+    
+    - uses: cb80/delrel@latest
+      with:
+        tag: latest
+        token: ${{ secrets.GITHUB_TOKEN }}
 
-  #   - name: Create release
-  #     id: create_release
-  #     uses: actions/create-release@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       tag_name: latest
-  #       release_name: cli
-  #       body: |
-  #         Packaged CLI
-  #       draft: false
-  #       prerelease: false
+    - name: Create GH Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: latest
+        release_name: cli
+        body: |
+          Packaged CLI
+        draft: false
+        prerelease: false
 
-  #   - name: Upload release asset (Windows)
-  #     id: upload-release-asset-win 
-  #     uses: actions/upload-release-asset@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #       asset_path: XXX
-  #       asset_name: cli-windows-x64.zip
-  #       asset_content_type: application/zip
+    - name: Upload release asset (Windows)
+      id: upload-release-asset-win 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Frontend/BlameSightFrontend/BlameSightFrontend/bin/Release/net8.0/win-x64/publish/cli-windows-x64.zip
+        asset_name: cli-windows-x64.zip
+        asset_content_type: application/zip
+
+    - name: Upload release asset (Linux)
+      id: upload-release-asset-linux 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Frontend/BlameSightFrontend/BlameSightFrontend/bin/Release/net8.0/linux-x64/publish/cli-linux-x64.zip
+        asset_name: cli-linux-x64.zip
+        asset_content_type: application/zip
+
+    - name: Upload release asset (osx)
+      id: upload-release-asset-osx 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Frontend/BlameSightFrontend/BlameSightFrontend/bin/Release/net8.0/osx-x64/publish/cli-osx-x64.zip
+        asset_name: cli-osx-x64.zip
+        asset_content_type: application/zip
 
 
   api-deploy:
