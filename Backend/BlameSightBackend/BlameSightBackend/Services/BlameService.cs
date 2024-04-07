@@ -82,6 +82,15 @@ namespace BlameSightBackend.Services
                                    .ToList();
 
         }
+        public async Task<bool?> setBlameComplete(int blamerID, int blameID)
+        {
+            var blame = _dbContext.Blames.Where(b => b.BlameId == blameID).FirstOrDefault();
+            if (blame == null) { return null; }
+            else if (blame.BlamerId != blamerID) { return false; }
+            blame.BlameComplete = true;
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
 
     }
 }

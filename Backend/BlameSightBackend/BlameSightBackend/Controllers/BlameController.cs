@@ -121,6 +121,23 @@ namespace BlameSightBackend.Controllers
 
             return Ok("You have no pending blames\nCongrats🎊");
         }
+        [HttpGet]
+        [Route("blameBegone/{id}")]
+        public async Task<IActionResult> setBlameComplete(int id)
+        {
+            var blamerId = await _userService.GetOrAddUserDB(JWTUtils.GetUsername(HttpContext));
+            var setBlame=await _blameService.setBlameComplete(blamerId, id);
+            switch (setBlame)
+            {
+                case null:
+                    return NotFound("⚠️Blame with the given ID not found");
+                case false:
+                    return Unauthorized("🚨You don't have permission to close this blame");
+                case true:
+                    return Ok("Blame successfully closed😊");
+            }
+
+        }
 
         private string getBlamed(string response, int lineNum)
         {
