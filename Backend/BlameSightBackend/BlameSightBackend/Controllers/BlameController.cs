@@ -44,7 +44,7 @@ namespace BlameSightBackend.Controllers
             var response = await client.SendQueryAsync(query.ToString());
 
             var validate = ValidateResponse(response, blameInput);
-            if(validate is not OkObjectResult)
+            if (validate != null)
             {
                 return validate;
             }
@@ -120,7 +120,7 @@ namespace BlameSightBackend.Controllers
             }
 
             // If none of the conditions are met, you can return a default response or continue processing
-            return Ok(); // Or another appropriate response
+            return null;
         }
     }
 }
