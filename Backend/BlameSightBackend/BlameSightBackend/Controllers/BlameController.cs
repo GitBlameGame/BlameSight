@@ -138,6 +138,15 @@ namespace BlameSightBackend.Controllers
             }
 
         }
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("blameShame")]
+        public async Task<IActionResult> getBlameShame(int id)
+        {
+            var shame = await _blameService.getBlameShame();
+            return Ok(shame);
+
+        }
 
         private string getBlamed(string response, int lineNum)
         {
