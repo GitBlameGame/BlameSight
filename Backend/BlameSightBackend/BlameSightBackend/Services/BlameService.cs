@@ -1,4 +1,5 @@
-﻿using BlameSightBackend.Models.Db;
+﻿using BlameSightBackend.Models;
+using BlameSightBackend.Models.Db;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlameSightBackend.Services
@@ -27,6 +28,27 @@ namespace BlameSightBackend.Services
                 await _dbContext.SaveChangesAsync();
                 return newBlame.BlameId;
           
+        }
+        public async Task<List<viewBlame>> getMyOpenBlames(int blamerID)
+        {
+                return await _dbContext.Blames.Include(b => b.Blamed).Include(b => b.Repo).ThenInclude(r => r.RepoOwner).Include(b => b.UrgencyDescriptor)
+                                       .Where(b => b.BlamerId == blamerID && !b.BlameComplete)
+                                       .Select(b => new viewBlame
+                                       {
+                                           Id=b.BlameId,
+                                           Name=b.Blamed.UserName,
+                                           Path=$"{b.Repo.RepoOwner.RepoOwnerName}/{b.Repo.RepoName}/{b.BlamePath}",
+                                           LineNum=b.BlameLine,
+                                           UrgencyDescriptor=b.UrgencyDescriptor.UrgencyDescriptorName,
+                                           blameComplete=b.BlameComplete,
+                                           blameViewed=b.BlameAccepted,
+                                           Comment=b.BlameMessage
+                                          
+                                       }
+
+                    )
+                                       .ToListAsync();
+           
         }
         
     }

@@ -48,7 +48,7 @@ namespace BlameSightBackend.Controllers
             var response = await client.SendQueryAsync(query.ToString());
 
             var validate = ValidateResponse(response, blameInput);
-            if(validate is not OkObjectResult)
+            if (validate != null)
             {
                 return validate;
             }
@@ -77,6 +77,7 @@ namespace BlameSightBackend.Controllers
                 });
 
             };
+            filePath = $"{blameInput.Branch}/{filePath}";
             var newBLame = _blameService.AddBlame(blamerID.Result, blamedID.Result, filePath, repoID.Result, blameInput.Comment, blameInput.LineNum, blameInput.Urgency);
             newBLame.Wait();
             if (newBLame == null)
@@ -88,6 +89,22 @@ namespace BlameSightBackend.Controllers
 
             };
             return Ok($"{authorName} was successfully blamed");
+        }
+        [HttpGet]
+        [Route("myBlames")]
+        public async Task<IActionResult> getMyBlames()
+        {
+            var blamerId = await _userService.GetOrAddUserDB(JWTUtils.GetUsername(HttpContext));
+            var blamesOpen=await _blameService.getMyOpenBlames(blamerId);
+            if (blamesOpen.Any())
+            {
+                Console.WriteLine(blamesOpen.ToString());
+                return Ok(blamesOpen);
+              
+                    
+                    }
+
+            return Ok("You have no open Blames");
         }
 
         private string getBlamed(string response, int lineNum)
@@ -103,7 +120,7 @@ namespace BlameSightBackend.Controllers
                 .FirstOrDefault();
             return authorName;
         }
-        public IActionResult ValidateResponse(string response, newBlame blameInput)
+        private IActionResult ValidateResponse(string response, newBlame blameInput)
         {
             if (response.Contains("Bad credentials") || response.Contains("Token expired"))
             {
@@ -122,9 +139,7 @@ namespace BlameSightBackend.Controllers
                 return NotFound($"Could not resolve a repository with the name: {blameInput.Path}\n" +
                     $"Please double-check the repository name for accuracy or verify that you have the necessary permissions to access it.");
             }
-
-            // If none of the conditions are met, you can return a default response or continue processing
-            return Ok(); // Or another appropriate response
+            return null; 
         }
     }
 }

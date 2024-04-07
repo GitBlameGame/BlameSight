@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -48,6 +49,7 @@ builder.Services.AddHttpClient("GitHub", httpClient =>
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<RepoService>();
 builder.Services.AddScoped<BlameService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
