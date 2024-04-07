@@ -9,7 +9,7 @@ class UserInput
 {
     static string gitHubLoginUrl = "https://github.com/login/device";
     static string? jwt;
-    static string baseUrl = "http://api-env.eba-kcb3b8tc.eu-west-1.elasticbeanstalk.com";
+    static string baseUrl = Environment.GetEnvironmentVariable("API_ENDPOINT");
 
     static async Task Main(string[] args)
     {
