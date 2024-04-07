@@ -1,7 +1,6 @@
-
-using BlameSightBackend;
 using BlameSightBackend.Models.Db;
 using BlameSightBackend.Services;
+using BlameSightBackend.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -37,7 +36,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(config.GetConnectionString("DBConnectionString")));
-builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(Utils.getConnectionString()));
+builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(DbUtils.getConnectionString()));
 builder.Services.AddHttpClient("GitHub", httpClient =>
 {
     httpClient.BaseAddress = new Uri("https://api.github.com/");

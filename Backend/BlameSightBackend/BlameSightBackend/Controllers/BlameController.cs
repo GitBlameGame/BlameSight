@@ -1,6 +1,7 @@
 ﻿using BlameSightBackend.Models;
 using BlameSightBackend.Models.Db;
 using BlameSightBackend.Services;
+using BlameSightBackend.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,8 +25,8 @@ namespace BlameSightBackend.Controllers
         [Route("newBlame")]
         public async Task<IActionResult> newBlame([FromBody] newBlame blameInput)
         {
-            var blamer = JWTService.GetUsername(HttpContext);
-            var token = JWTService.GetBearerToken(HttpContext);
+            var blamer = JWTUtils.GetUsername(HttpContext);
+            var token = JWTUtils.GetBearerToken(HttpContext);
             if (blamer == null || token == null)
             {
                 return Unauthorized("JWT Invalid, please login again");
@@ -55,7 +56,7 @@ namespace BlameSightBackend.Controllers
                 return BadRequest("Line number is not valid");
             };
 
-            var (repositoryOwner, repositoryName, filePath) = Utils.ParsePath(blameInput.Path);
+            var (repositoryOwner, repositoryName, filePath) = RepoUtils.ParsePath(blameInput.Path);
 
             var repoID =  _repoService.GetOrAddRepoDB(repositoryName, repositoryOwner);
             repoID.Wait();
