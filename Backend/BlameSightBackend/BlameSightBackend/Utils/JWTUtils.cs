@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 
-namespace BlameSightBackend.Services
+namespace BlameSightBackend.Utils
 {
-    public static class JWTService
+    public static class JWTUtils
     {
 
         public static string GetUsername(HttpContext httpContext)
@@ -18,7 +18,7 @@ namespace BlameSightBackend.Services
                     // Use the usernameClaim as needed for your logic
                     return usernameClaim;
                 }
-                
+
             }
             return null;
         }

@@ -30,17 +30,17 @@ public partial class Blame
     public string BlamePath { get; set; } = null!;
 
     [Column("blame_line")]
-    public int? BlameLine { get; set; }
+    public int BlameLine { get; set; }
 
     [Column("blame_message")]
     [StringLength(256)]
     public string? BlameMessage { get; set; }
 
     [Column("blame_accepted")]
-    public bool? BlameAccepted { get; set; }
+    public bool BlameAccepted { get; set; }
 
     [Column("blame_complete")]
-    public bool? BlameComplete { get; set; }
+    public bool BlameComplete { get; set; }
 
     [Column("blame_timestamp", TypeName = "timestamp without time zone")]
     public DateTime BlameTimestamp { get; set; }

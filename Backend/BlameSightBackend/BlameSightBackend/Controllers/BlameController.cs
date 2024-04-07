@@ -1,6 +1,7 @@
 ﻿using BlameSightBackend.Models;
 using BlameSightBackend.Models.Db;
 using BlameSightBackend.Services;
+using BlameSightBackend.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,20 +25,23 @@ namespace BlameSightBackend.Controllers
         [Route("newBlame")]
         public async Task<IActionResult> newBlame([FromBody] newBlame blameInput)
         {
-            var blamer = JWTService.GetUsername(HttpContext);
-            var token = JWTService.GetBearerToken(HttpContext);
+            var blamer = JWTUtils.GetUsername(HttpContext);
+            var token = JWTUtils.GetBearerToken(HttpContext);
             if (blamer == null || token == null)
             {
                 return Unauthorized("JWT Invalid, please login again");
             }
-
+            if(blameInput.Comment.Length>256)
+            { 
+                return BadRequest("Blame Comment cannot exceed 256 characters. Please try to make your point concise.");
+            }
             if (blameInput.Path.Count(f => f == '/') < 2)
             {
                 return BadRequest("Path is not in the correct format\nowner/repo/pathtofile");
             }
             if (blameInput.Urgency < 1 || blameInput.Urgency > 5)
             {
-                return BadRequest("Urgency must be 1 to 5");
+                return BadRequest("Urgency level must be between 1 and 5.");
             }
             var client = new GraphQLClient(token);
             var query = client.generateBlameQL(blameInput);
@@ -55,7 +59,7 @@ namespace BlameSightBackend.Controllers
                 return BadRequest("Line number is not valid");
             };
 
-            var (repositoryOwner, repositoryName, filePath) = Utils.ParsePath(blameInput.Path);
+            var (repositoryOwner, repositoryName, filePath) = RepoUtils.ParsePath(blameInput.Path);
 
             var repoID =  _repoService.GetOrAddRepoDB(repositoryName, repositoryOwner);
             repoID.Wait();
@@ -73,6 +77,7 @@ namespace BlameSightBackend.Controllers
                 });
 
             };
+            filePath = $"{blameInput.Branch}/{filePath}";
             var newBLame = _blameService.AddBlame(blamerID.Result, blamedID.Result, filePath, repoID.Result, blameInput.Comment, blameInput.LineNum, blameInput.Urgency);
             newBLame.Wait();
             if (newBLame == null)
@@ -85,8 +90,56 @@ namespace BlameSightBackend.Controllers
             };
             return Ok($"{authorName} was successfully blamed");
         }
+        [HttpGet]
+        [Route("myBlames")]
+        public async Task<IActionResult> getMyCreatedBlames()
+        {
+            var blamerId = await _userService.GetOrAddUserDB(JWTUtils.GetUsername(HttpContext));
+            var blamesOpen=await _blameService.getMyCreatedBlames(blamerId);
+            if (blamesOpen.Any())
+            {
+                Console.WriteLine(blamesOpen.ToString());
+                return Ok(blamesOpen);
+              
+                    
+                    }
 
-        public string getBlamed(string response, int lineNum)
+            return Ok("None of the blames you have created are currently open");
+        }
+
+        [HttpGet]
+        [Route("openBlames")]
+        public async Task<IActionResult> getOpenBlames()
+        {
+            var blamedId= await _userService.GetOrAddUserDB(JWTUtils.GetUsername(HttpContext));
+            var blames= await _blameService.getMyOpenBlames(blamedId);
+            if (blames.Any())
+            {
+                Console.WriteLine(blames.ToString());
+                return Ok(blames);
+            }
+
+            return Ok("You have no pending blames\nCongrats🎊");
+        }
+        [HttpGet]
+        [Route("blameBegone/{id}")]
+        public async Task<IActionResult> setBlameComplete(int id)
+        {
+            var blamerId = await _userService.GetOrAddUserDB(JWTUtils.GetUsername(HttpContext));
+            var setBlame=await _blameService.setBlameComplete(blamerId, id);
+            switch (setBlame)
+            {
+                case null:
+                    return NotFound("⚠️Blame with the given ID not found");
+                case false:
+                    return Unauthorized("🚨You don't have permission to close this blame");
+                case true:
+                    return Ok("Blame successfully closed😊");
+            }
+
+        }
+
+        private string getBlamed(string response, int lineNum)
         {
             using JsonDocument doc = JsonDocument.Parse(response);
             JsonElement root = doc.RootElement;
@@ -99,7 +152,7 @@ namespace BlameSightBackend.Controllers
                 .FirstOrDefault();
             return authorName;
         }
-        public IActionResult ValidateResponse(string response, newBlame blameInput)
+        private IActionResult ValidateResponse(string response, newBlame blameInput)
         {
             if (response.Contains("Bad credentials") || response.Contains("Token expired"))
             {
@@ -118,9 +171,7 @@ namespace BlameSightBackend.Controllers
                 return NotFound($"Could not resolve a repository with the name: {blameInput.Path}\n" +
                     $"Please double-check the repository name for accuracy or verify that you have the necessary permissions to access it.");
             }
-
-            // If none of the conditions are met, you can return a default response or continue processing
-            return null;
+            return null; 
         }
     }
 }

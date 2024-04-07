@@ -1,5 +1,5 @@
-using BlameSightBackend;
 using BlameSightBackend.Models;
+using BlameSightBackend.Utils;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -70,7 +70,7 @@ public class GraphQLClient
     }
     public string generateBlameQL(newBlame blameInput)
     {
-        var (repositoryOwner, repositoryName, filePath) = Utils.ParsePath(blameInput.Path);
+        var (repositoryOwner, repositoryName, filePath) = RepoUtils.ParsePath(blameInput.Path);
         var author = new GraphField("author", graphObject: new([new GraphField("name")]));
         var commit = new GraphField("commit", graphObject: new([author]));
         var ranges = new GraphField("ranges", graphObject: new([new GraphField("startingLine"), new GraphField("endingLine"), commit]));
