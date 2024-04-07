@@ -92,10 +92,10 @@ namespace BlameSightBackend.Controllers
         }
         [HttpGet]
         [Route("myBlames")]
-        public async Task<IActionResult> getMyBlames()
+        public async Task<IActionResult> getMyCreatedBlames()
         {
             var blamerId = await _userService.GetOrAddUserDB(JWTUtils.GetUsername(HttpContext));
-            var blamesOpen=await _blameService.getMyOpenBlames(blamerId);
+            var blamesOpen=await _blameService.getMyCreatedBlames(blamerId);
             if (blamesOpen.Any())
             {
                 Console.WriteLine(blamesOpen.ToString());
@@ -104,7 +104,22 @@ namespace BlameSightBackend.Controllers
                     
                     }
 
-            return Ok("You have no open Blames");
+            return Ok("None of the blames you have created are currently open");
+        }
+
+        [HttpGet]
+        [Route("openBlames")]
+        public async Task<IActionResult> getOpenBlames()
+        {
+            var blamedId= await _userService.GetOrAddUserDB(JWTUtils.GetUsername(HttpContext));
+            var blames= await _blameService.getMyOpenBlames(blamedId);
+            if (blames.Any())
+            {
+                Console.WriteLine(blames.ToString());
+                return Ok(blames);
+            }
+
+            return Ok("You have no pending blames\nCongrats🎊");
         }
 
         private string getBlamed(string response, int lineNum)
