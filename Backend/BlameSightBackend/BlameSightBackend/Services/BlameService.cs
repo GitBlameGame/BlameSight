@@ -91,6 +91,23 @@ namespace BlameSightBackend.Services
             await _dbContext.SaveChangesAsync();
             return true;
         }
+        public async Task<List<rankUser>> getBlameShame()
+        {
 
+            var topUsers = await _dbContext.Blames
+            .Where(e => !e.BlameComplete)
+            .GroupBy(e => e.Blamed)
+            .Select(group => new rankUser
+            {
+            Name = group.Key.UserName,
+            BlamePoints = group.Sum(e => e.UrgencyDescriptorId)?? 0
+            })
+            .OrderByDescending(result => result.BlamePoints)
+            .Take(5)
+            .ToListAsync();
+
+
+            return topUsers;
+        }
     }
 }

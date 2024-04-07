@@ -88,7 +88,11 @@ namespace BlameSightBackend.Controllers
                 });
 
             };
-            return Ok($"{authorName} was successfully blamed");
+            if(blamedID.Result==blamerID.Result)
+            {
+                return Ok("🤡Woops, looks it is you to blame for this code!\nYou were still successfully blamed.");
+            }
+            return Ok($"{authorName} was successfully blamed.");
         }
         [HttpGet]
         [Route("myBlames")]
@@ -136,6 +140,15 @@ namespace BlameSightBackend.Controllers
                 case true:
                     return Ok("Blame successfully closed😊");
             }
+
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("blameShame")]
+        public async Task<IActionResult> getBlameShame(int id)
+        {
+            var shame = await _blameService.getBlameShame();
+            return Ok(shame);
 
         }
 
