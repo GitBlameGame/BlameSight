@@ -4,4 +4,12 @@ databaseChangeLog:
    - include:
       file: ./database/tableAlters.sql
    - include:
-      file: ./database/mockData.sql
+      file: ./database/mockData/users.sql
+   - include:
+      file: ./database/mockData/urgency_descriptors.sql
+   - include:
+      file: ./database/mockData/repo_owners.sql
+   - include:
+      file: ./database/mockData/repos.sql
+   - include:
+      file: ./database/mockData/blames.sql
