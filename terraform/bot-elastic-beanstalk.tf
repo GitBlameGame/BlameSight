@@ -3,7 +3,7 @@ data "aws_secretsmanager_secret_version" "discord_bot_token" {
 }
 
 resource "aws_secretsmanager_secret" "discord_bot_token" {
-  name = "discord-bot-token"
+  name = "discord-bot-token-v2"
 }
 
 resource "aws_s3_bucket" "beanstalk_bucket_bot" {
