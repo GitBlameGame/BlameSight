@@ -13,7 +13,7 @@ namespace BlameSightBackend.Services
 
             var newBlame = new Blame
             {
-                BlameAccepted = false,
+                BlameViewed = false,
                 BlameComplete = false,
                 BlamerId = blamerID,
                 BlamedId = blamedID,
@@ -45,7 +45,7 @@ namespace BlameSightBackend.Services
                                        LineNum = b.BlameLine,
                                        UrgencyDescriptor = b.UrgencyDescriptor.UrgencyDescriptorName,
                                        blameComplete = b.BlameComplete,
-                                       blameViewed = b.BlameAccepted,
+                                       blameViewed = b.BlameViewed,
                                        Comment = b.BlameMessage
 
                                    }
@@ -62,7 +62,7 @@ namespace BlameSightBackend.Services
                                    .ThenInclude(r => r.RepoOwner)
                                    .Include(b => b.UrgencyDescriptor)
                                    .Where(b => b.BlamedId == blamedD && !b.BlameComplete).ToListAsync();
-            blamelist.ForEach(b => b.BlameAccepted = true);
+            blamelist.ForEach(b => b.BlameViewed = true);
             await _dbContext.SaveChangesAsync();
             return blamelist
                                    .Select(b => new viewBlame
@@ -73,7 +73,7 @@ namespace BlameSightBackend.Services
                                        LineNum = b.BlameLine,
                                        UrgencyDescriptor = b.UrgencyDescriptor.UrgencyDescriptorName,
                                        blameComplete = b.BlameComplete,
-                                       blameViewed = b.BlameAccepted,
+                                       blameViewed = b.BlameViewed,
                                        Comment = b.BlameMessage
 
                                    }
@@ -100,7 +100,7 @@ namespace BlameSightBackend.Services
             .Select(group => new rankUser
             {
             Name = group.Key.UserName,
-            BlamePoints = group.Sum(e => e.UrgencyDescriptorId)?? 0
+            BlamePoints = group.Sum(e => e.UrgencyDescriptorId)
             })
             .OrderByDescending(result => result.BlamePoints)
             .Take(5)

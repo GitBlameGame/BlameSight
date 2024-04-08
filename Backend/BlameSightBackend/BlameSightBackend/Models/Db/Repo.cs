@@ -25,5 +25,5 @@ public partial class Repo
 
     [ForeignKey("RepoOwnerId")]
     [InverseProperty("Repos")]
-    public virtual Repoowner RepoOwner { get; set; }
+    public virtual Repoowner RepoOwner { get; set; } = null!;
 }
