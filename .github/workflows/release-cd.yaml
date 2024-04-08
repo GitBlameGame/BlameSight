@@ -116,15 +116,15 @@ jobs:
 
     - name: Publish API
       working-directory: ./Backend/BlameSightBackend
-      run: dotnet publish -c Release --output ../../bundle/api
+      run: dotnet publish -c Release --output ../../bundle/api/api
 
     - name: Create ZIP Package
-      working-directory: ./bundle
+      working-directory: ./bundle/api
       run: |
         zip -r deploy_package.zip .
 
     - name: Upload API Package
-      working-directory: ./bundle
+      working-directory: ./bundle/api
       run: aws s3 cp deploy_package.zip s3://263883060207-deploy-bucket
 
     - name: Create New API Version
@@ -132,3 +132,42 @@ jobs:
 
     - name: Deploy API
       run: aws elasticbeanstalk update-environment --environment-name api-env --version-label "deploy-${{ github.sha }}"
+
+
+  bot-deploy:
+    name: Bot Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{secrets.AWS_ASSUME_ROLE}}
+        aws-region: "eu-west-1"
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Publish API
+      working-directory: ./Backend/DiscordBot
+      run: dotnet publish -c Release --output ../../bundle/bot/bot
+
+    - name: Create ZIP Package
+      working-directory: ./bundle/bot
+      run: |
+        zip -r deploy_package.zip .
+
+    - name: Upload Bot Package
+      working-directory: ./bundle/bot
+      run: aws s3 cp deploy_package.zip s3://263883060207-deploy-bucket-bot
+
+    - name: Create New Bot Version
+      run: aws elasticbeanstalk create-application-version --application-name bot-app --source-bundle S3Bucket="263883060207-deploy-bucket-bot",S3Key="deploy_package.zip" --version-label "deploy-${{ github.sha }}" --description "commit-sha-${{ github.sha }}"
+
+    - name: Deploy Bot
+      run: aws elasticbeanstalk update-environment --environment-name bot-env --version-label "deploy-${{ github.sha }}"
