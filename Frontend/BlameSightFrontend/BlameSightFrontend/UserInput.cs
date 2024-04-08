@@ -13,7 +13,7 @@ class UserInput
 
     static async Task Main(string[] args)
     {
-
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
         HttpClient client = new HttpClient();
 
         await DisplayGreetingAsync(client);
