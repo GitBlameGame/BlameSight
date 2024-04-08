@@ -1,3 +1,11 @@
+data "aws_secretsmanager_secret_version" "discord_bot_token" {
+  secret_id = aws_secretsmanager_secret.discord_bot_token.arn
+}
+
+resource "aws_secretsmanager_secret" "discord_bot_token" {
+  name = "discord-bot-token"
+}
+
 resource "aws_s3_bucket" "beanstalk_bucket_bot" {
   bucket        = "${local.account-id}-deploy-bucket-bot"
   force_destroy = true
@@ -66,8 +74,8 @@ resource "aws_elastic_beanstalk_environment" "bot_env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SERVER_PORT"
-    value     = "5000"
+    name      = "JWT_SECRET_KEY"
+    value     = data.aws_secretsmanager_secret_version.discord_bot_token.secret_string
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
