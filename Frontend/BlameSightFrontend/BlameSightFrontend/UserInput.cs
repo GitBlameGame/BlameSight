@@ -96,7 +96,6 @@ class UserInput
     }
 
 
-
     static async Task Login(HttpClient client)
     {
         var deviceCodeResponse = await GetDeviceCode(baseUrl, client);
