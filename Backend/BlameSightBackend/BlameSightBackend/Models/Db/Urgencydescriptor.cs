@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlameSightBackend.Models.Db;
 
-[Table("urgencydescriptors")]
+[Table("urgency_descriptors")]
+[Index("UrgencyDescriptorName", Name = "urgencydescriptors_urgency_descriptor_name_key", IsUnique = true)]
 public partial class Urgencydescriptor
 {
     [Key]

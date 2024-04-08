@@ -3,3 +3,5 @@ databaseChangeLog:
       file: ./database/tableCreates.sql
    - include:
       file: ./database/tableAlters.sql
+   - include:
+      file: ./database/mockData.sql

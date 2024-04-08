@@ -14,16 +14,16 @@ public partial class Blame
     public int BlameId { get; set; }
 
     [Column("blamer_id")]
-    public int? BlamerId { get; set; }
+    public int BlamerId { get; set; }
 
     [Column("blamed_id")]
-    public int? BlamedId { get; set; }
+    public int BlamedId { get; set; }
 
     [Column("urgency_descriptor_id")]
-    public int? UrgencyDescriptorId { get; set; }
+    public int UrgencyDescriptorId { get; set; }
 
     [Column("repo_id")]
-    public int? RepoId { get; set; }
+    public int RepoId { get; set; }
 
     [Column("blame_path")]
     [StringLength(4096)]
@@ -34,10 +34,10 @@ public partial class Blame
 
     [Column("blame_message")]
     [StringLength(256)]
-    public string? BlameMessage { get; set; }
+    public string BlameMessage { get; set; } = null!;
 
-    [Column("blame_accepted")]
-    public bool BlameAccepted { get; set; }
+    [Column("blame_viewed")]
+    public bool BlameViewed { get; set; }
 
     [Column("blame_complete")]
     public bool BlameComplete { get; set; }
@@ -47,17 +47,17 @@ public partial class Blame
 
     [ForeignKey("BlamedId")]
     [InverseProperty("BlameBlameds")]
-    public virtual User? Blamed { get; set; }
+    public virtual User Blamed { get; set; } = null!;
 
     [ForeignKey("BlamerId")]
     [InverseProperty("BlameBlamers")]
-    public virtual User? Blamer { get; set; }
+    public virtual User Blamer { get; set; } = null!;
 
     [ForeignKey("RepoId")]
     [InverseProperty("Blames")]
-    public virtual Repo? Repo { get; set; }
+    public virtual Repo Repo { get; set; } = null!;
 
     [ForeignKey("UrgencyDescriptorId")]
     [InverseProperty("Blames")]
-    public virtual Urgencydescriptor? UrgencyDescriptor { get; set; }
+    public virtual Urgencydescriptor UrgencyDescriptor { get; set; } = null!;
 }

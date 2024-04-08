@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlameSightBackend.Models.Db;
 
-[Table("repoowners")]
+[Table("repo_owners")]
 [Index("RepoOwnerName", Name = "repo_owner_name_unique", IsUnique = true)]
 public partial class Repoowner
 {
