@@ -9,11 +9,11 @@ class UserInput
 {
     static string gitHubLoginUrl = "https://github.com/login/device";
     static string? jwt;
-    static string baseUrl = Environment.GetEnvironmentVariable("API_ENDPOINT");
+    static string baseUrl = "http://api-env.eba-kcb3b8tc.eu-west-1.elasticbeanstalk.com";
 
     static async Task Main(string[] args)
     {
-
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
         HttpClient client = new HttpClient();
 
         await DisplayGreetingAsync(client);
