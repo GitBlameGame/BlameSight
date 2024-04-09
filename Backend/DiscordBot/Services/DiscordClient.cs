@@ -4,6 +4,8 @@ using System.Net.Http.Headers;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using static DiscordBot.Services.DiscordClient;
 
 
 namespace DiscordBot.Services
@@ -32,7 +34,7 @@ namespace DiscordBot.Services
         Thread? heartbeatThread;
 
         public DiscordClient(string token)
-        {   
+        {
             _userStateManager = new UserStateManager();
             _commandHandler = new();
             ws = new();
@@ -88,8 +90,8 @@ namespace DiscordBot.Services
             await ws.SendAsync(bytesToSend, WebSocketMessageType.Text, true, source.Token);
         }
 
-       
-        
+
+
 
         public async Task start()
         {
@@ -134,6 +136,30 @@ namespace DiscordBot.Services
                                     await confirm(gatewayEvent.d.channel_id, gatewayEvent.d.author.id);
                                     await GetHelloWorld(gatewayEvent);
                                 }
+                                if (gatewayEvent.d.content.Equals("/blame help"))
+                                {
+                                    await sendHelp(gatewayEvent.d.channel_id);
+                                }
+                                if (Regex.IsMatch(gatewayEvent.d.content, @"^/blame newBlame\b"))
+                                {
+                                    await NewBlame(gatewayEvent);
+                                }
+                                if (Regex.IsMatch(gatewayEvent.d.content, @"^/blame shame\b"))
+                                {
+                                    await GetBlameShame(gatewayEvent);
+                                }
+                                if (Regex.IsMatch(gatewayEvent.d.content, @"^/blame openBlames\b"))
+                                {
+                                    await getMyOpenBlames(gatewayEvent);
+                                }
+                                if (Regex.IsMatch(gatewayEvent.d.content, @"^/blame myBlames\b"))
+                                {
+                                    await getMyCreatedBlames(gatewayEvent);
+                                }
+                                if (Regex.IsMatch(gatewayEvent.d.content, @"^/blame begoneBlame\b"))
+                                {
+                                    await SetBlameComplete(gatewayEvent);
+                                }
                                 //_commandHandler.Handle(gatewayEvent);
                                 //Console.WriteLine(receivedMessage);
                                 //await sendMessage(new DiscordMessage("Hello there " + gatewayEvent.d.author.username), gatewayEvent.d.channel_id);
@@ -156,7 +182,7 @@ namespace DiscordBot.Services
             }
         }
 
-        
+
 
 
 
@@ -186,7 +212,7 @@ namespace DiscordBot.Services
                 UserState user = _userStateManager.getUserState(discord_id);
                 var deviceCode = user.deviceCode ?? throw new Exception("No device code for this user, start at /blame login please.");
                 var accessTokenResponse = await ExchangeDeviceCodeForAccessToken(baseUrl, backendHTTPClient, deviceCode);
-                
+
                 if (!accessTokenResponse.ContainsKey("access_token"))
                 {
                     Console.WriteLine("Authorization process was not completed. Please try again.");
@@ -202,10 +228,10 @@ namespace DiscordBot.Services
                 var jwtResponse = await GetJwtFromBackend(baseUrl, backendHTTPClient, accessToken);
                 user.jwt = jwtResponse;
                 _userStateManager.putUserState(user);
-                
+
 
             }
-            
+
         }
         public async Task login(string channel_id, string discord_id)
         {
@@ -220,7 +246,7 @@ namespace DiscordBot.Services
             DiscordMessage msg = new($"\nPlease visit {gitHubLoginUrl} and enter the code : {userCode}\n\n Type '/blame confirm' after you have authorized.");
             await sendMessage(msg, channel_id);
 
-            
+
         }
 
 
@@ -242,13 +268,147 @@ namespace DiscordBot.Services
             public int lineNum { get; set; }
             public bool blameViewed { get; set; }
             public bool blameComplete { get; set; }
+
+            public override string ToString()
+            {
+                string blameString = "";
+                blameString +=$"ID: {id}";
+                blameString +=$"Name: {name}";
+                blameString +=$"Path: {path}";
+                blameString +=$"Comment: {comment}";
+                blameString +=$"Urgency: {urgencyDescriptor}";
+                blameString +=$"Line Number: {lineNum}";
+                blameString +=$"Blame Viewed: {blameViewed}";
+                blameString +=$"Blame Complete: {blameComplete}";
+                
+                return blameString;
+            }
         }
         public async Task DisplayGreetingAsync(Message message)
         {
-            
-              string welcomeMessage = "Welcome to BlameSight!\n\n For more information, type 'blame help'.\n🔥 This Week's Board of Shame 🔥\n";
+
+            string welcomeMessage = "Welcome to BlameSight!\n\n For more information, type 'blame help'.\n🔥 This Week's Board of Shame 🔥\n";
             DiscordMessage msg = new(welcomeMessage);
-            await GetBlameShame(backendHTTPClient, channel_id: message.d.channel_id);
+            await GetBlameShame(message);
+        }
+
+        public async Task sendHelp(string channelId)
+        {
+            string commands = "";
+            
+
+            commands +="╔══════════════════════════════ Help Screen ══════════════════════════════╗\n";
+            commands +="║                                                                         ║\n";
+            commands +="║ blame help            Display this help screen.                         ║\n";
+            commands +="║ blame login           Login to BlameSight.                              ║\n";
+            commands +="║ blame newBlame        Blame a user on a GitHub repository.              ║\n";
+            commands +="║ blame myBlames        View blames where you were the author.            ║\n";
+            commands +="║ blame openBlames      View open blames that you initiated.              ║\n";
+            commands +="║ blame begoneBlame     Mark a blame as resolved.                         ║\n";
+            commands +="║ clear                 Clear the terminal                                ║\n";
+            commands +="║                                                                         ║\n";
+            commands +="║Commands are case insensitive.                                           ║\n";
+            commands +="╚═════════════════════════════════════════════════════════════════════════╝\n";
+
+            await sendMessage(new DiscordMessage(commands), channelId);
+        }
+
+        // =================================
+        //            QUERIES
+        // =================================
+
+        public async Task SetBlameComplete(Message message)
+        {
+            if (_userStateManager.userStateExists(message.d.author.id) && _userStateManager.getUserState(message.d.author.id).currentState == State.LOGGED_IN)
+            {
+                // Set the Authorization header with the JWT token
+                backendHTTPClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _userStateManager.getUserState(message.d.author.id).jwt);
+
+                var commandDict = _commandHandler.ExtractParameterBody(
+                    ["id"],
+                    _commandHandler.splitCommand(message.d.content));
+                // Send the HTTP request
+                HttpResponseMessage response = await backendHTTPClient.GetAsync(baseUrl + $"/api/Blames/blameBegone/{commandDict.GetValueOrDefault("id")}");
+
+                // Check if the request was successful
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Server response: {responseBody}");
+                    await sendMessage(new DiscordMessage(responseBody), message.d.channel_id);
+                }
+                else
+                {
+                    // Print out the detailed error reason if available
+                    string errorMessage = response.ReasonPhrase; // Default to the reason phrase
+                    if (response.Content != null)
+                    {
+                        errorMessage = await response.Content.ReadAsStringAsync();
+                    }
+                    Console.WriteLine($"\nError ({response.StatusCode}): {errorMessage}");
+                    return;
+                }
+            }
+            else
+            {
+                Console.WriteLine("JWT token is missing. Please log in first.");
+            }
+        }
+        public async Task getMyOpenBlames(Message message)
+        {
+            if (_userStateManager.userStateExists(message.d.author.id) && _userStateManager.getUserState(message.d.author.id).currentState == State.LOGGED_IN)
+            {
+                // Set the Authorization header with the JWT token
+                backendHTTPClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _userStateManager.getUserState(message.d.author.id).jwt);
+
+
+                using (var cts = new CancellationTokenSource())
+                {
+                    
+
+                    HttpResponseMessage response = await backendHTTPClient.GetAsync(baseUrl + "/api/Blames/openBlames");
+                    
+                    
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        // Deserialize the JSON response into a list of Blame objects
+                        if (responseBody.Contains("You have no pending blames"))
+                        {
+                            await sendMessage(new DiscordMessage("You have no pending blames. Congrats! 🎊"), message.d.channel_id);
+                            return; // Return an empty list
+                        }
+                        Console.WriteLine(responseBody);
+
+                        var blames = JsonSerializer.Deserialize<List<Blame>>(responseBody);
+
+                        string result = string.Empty;
+                        Console.WriteLine("\nBlames:");
+                        foreach (var blame in blames)
+                        {
+                            result += blame.ToString();
+                        }
+                        await sendMessage(new DiscordMessage(result), message.d.channel_id);
+                    }
+                    else
+                    {
+                        // Print out the detailed error reason if available
+                        string errorMessage = response.ReasonPhrase; // Default to the reason phrase
+                        if (response.Content != null)
+                        {
+                            errorMessage = await response.Content.ReadAsStringAsync();
+                        }
+                        Console.WriteLine($"\nError ({response.StatusCode}): {errorMessage}");
+                        return;
+                    }
+
+                }
+            }
+            else
+            {
+                Console.WriteLine("JWT token is missing. Please log in first.");
+            }
         }
 
         private async Task GetHelloWorld(Message message)
@@ -265,7 +425,6 @@ namespace DiscordBot.Services
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
                     await sendMessage(new DiscordMessage(responseBody), message.d.channel_id);
-                    //Console.WriteLine($"Server response: {responseBody}");
                 }
                 else
                 {
@@ -278,36 +437,151 @@ namespace DiscordBot.Services
                 Console.WriteLine("JWT token is missing. Please log in first.");
             }
         }
-        public async Task GetBlameShame(HttpClient client, string channel_id)
+        public async Task GetBlameShame(Message message)
 
         {
-            try
-            {
-                HttpResponseMessage response = await client.GetAsync(baseUrl + "/api/Blames/blameShame");
-
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    string responseBody = await response.Content.ReadAsStringAsync();
+                    HttpResponseMessage response = await backendHTTPClient.GetAsync(baseUrl + "/api/Blames/blameShame");
 
-                    var blameShame = JsonSerializer.Deserialize<RankUser[]>(responseBody);
-                    string result = "";
-                    foreach (var user in blameShame)
+                    if (response.IsSuccessStatusCode)
                     {
-                        result += $"Name: {user.name}, Blame Points: {user.blamePoints}\n";
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        var blameShame = JsonSerializer.Deserialize<RankUser[]>(responseBody);
+                        string result = "";
+                        foreach (var user in blameShame)
+                        {
+                            result += $"Name: {user.name}, Blame Points: {user.blamePoints}\n";
+                        }
+                        await sendMessage(new DiscordMessage(result), message.d.channel_id);
                     }
-                    await sendMessage(new DiscordMessage(result), channel_id );
+                    else
+                    {
+                        Console.WriteLine($"Error: {response.StatusCode} - {response.ReasonPhrase}");
+                    }
+
                 }
-                else
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {response.StatusCode}");
+                    Console.WriteLine($"An error occurred: {ex.Message}");
                 }
 
-            }
-            catch (Exception ex)
+        }
+
+        public  async Task getMyCreatedBlames(Message message)
+        {
+            if (_userStateManager.userStateExists(message.d.author.id) && _userStateManager.getUserState(message.d.author.id).currentState == State.LOGGED_IN)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                // Set the Authorization header with the JWT token
+                backendHTTPClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _userStateManager.getUserState(message.d.author.id).jwt);
+
+
+                using (var cts = new CancellationTokenSource())
+                {
+                    
+
+                    HttpResponseMessage response = await backendHTTPClient.GetAsync(baseUrl + "/api/Blames/myBlames");
+                    
+
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        // Deserialize the JSON response into a list of Blame objects
+                        try 
+                        {
+                            var blames = JsonSerializer.Deserialize<List<Blame>>(responseBody);
+                            string result = string.Empty;
+                            Console.WriteLine("\nBlames:");
+                            foreach (var blame in blames)
+                            {
+                                result += blame.ToString();
+                            }
+                            await sendMessage(new DiscordMessage(result), message.d.channel_id);
+                        }
+                        catch
+                        {
+                            await sendMessage(new DiscordMessage(responseBody), message.d.channel_id);
+                        }
+                        
+                        
+                    }
+                    else
+                    {
+                        // Print out the detailed error reason if available
+                        string errorMessage = response.ReasonPhrase; // Default to the reason phrase
+                        if (response.Content != null)
+                        {
+                            errorMessage = await response.Content.ReadAsStringAsync();
+                        }
+                        Console.WriteLine($"\nError ({response.StatusCode}): {errorMessage}");
+                        return;
+                    }
+
+                }
+            }
+            else
+            {
+                Console.WriteLine("JWT token is missing. Please log in first.");
             }
         }
+        public async Task NewBlame(Message message)
+        {
+            if (_userStateManager.userStateExists(message.d.author.id) && _userStateManager.getUserState(message.d.author.id).currentState == State.LOGGED_IN)
+            {
+
+                // Set the Authorization header with the JWT token
+                backendHTTPClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _userStateManager.getUserState(message.d.author.id).jwt);
+
+                var commandDict = _commandHandler.ExtractParameterBody(
+                    (new NewBlameRequest().getKeys()),
+                    _commandHandler.splitCommand(message.d.content));
+
+                NewBlameRequest newBlameRequest = new NewBlameRequest(commandDict);
+
+                // Serialize the request body to JSON
+                var jsonString = JsonSerializer.Serialize(newBlameRequest);
+                var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+
+                // Start loader animation
+                using (var cts = new CancellationTokenSource())
+                {
+                    HttpResponseMessage response;
+                    response = await backendHTTPClient.PutAsync(baseUrl + "/api/Blames/newBlame", httpContent);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"\nServer response: {responseBody}");
+                        //TODO: Send response back to discord channelk
+                        await sendMessage(new DiscordMessage(responseBody), message.d.channel_id);
+                    }
+                    else
+                    {
+                        // Print out the detailed error reason if available
+                        string errorMessage = response.ReasonPhrase; // Default to the reason phrase
+                        if (response.Content != null)
+                        {
+                            errorMessage = await response.Content.ReadAsStringAsync();
+                        }
+                        Console.WriteLine($"\nError ({response.StatusCode}): {errorMessage}");
+                        return;
+                    }
+
+                }
+            }
+            else
+            {
+                Console.WriteLine("JWT token is missing. Please log in first.");
+            }
+        }
+
+        /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         *                  HELPER FUNCTIONS
+         * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         */
+
 
         static async Task<Dictionary<string, string>> GetDeviceCode(string baseUrl, HttpClient client)
         {
