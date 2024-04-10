@@ -16,23 +16,33 @@ namespace DiscordBot.Services
             return command.Split("-").ToList();
         }
 
+        
 
-        public Dictionary<string, string> ExtractParameterBody(List<string> keys, List<string> arguments)
+
+        public Dictionary<string, string> ExtractParameterBody(List<string> keys, string body)
         {
-            Dictionary<string, string> result = new();
-            foreach (string key in keys)
-            {
-                string pattern = $"^{key.ToUpper()}";
-                foreach (var item in arguments)
-                {
-                    if (Regex.IsMatch(item.ToUpper(), pattern))
-                    {
-                        Console.WriteLine(item.Remove(0, key.Length).Trim());
-                        result.Add(key, item.Remove(0, key.Length).Trim());
-                    }
-                }
+            /*
+             * Regex to find parameters in a command according to the following rules:
+                - Parameter names will start with a hyphen, followed by the name eg: -path
+                - String parameter bodies will be enclosed by "
+                - Int parameter bodies do not need to be enclosed 
+             * 
+             */
+            string pattern = @"-(\w+)(?:\s*?+""([^""]+)"" | (\s*?[0-9]+) )?";
+            string pattern2 = @"-(\w+)\s*(""(.*?)""|(\d+))";
 
+            MatchCollection matches = Regex.Matches(body, pattern2);
+            Dictionary<string, string> result = new();
+            foreach (Match match in matches)
+            {
+                string parameter = match.Groups[1].Value;
+                string value = match.Groups[2].Value.Replace("\"",  "");
+                Console.WriteLine($"Parameter: {parameter}, Body: {body}");
+                result.Add( parameter.ToLower(), value );
             }
+
+            
+            
             return result;
         }
 

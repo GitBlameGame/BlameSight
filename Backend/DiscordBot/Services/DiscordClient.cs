@@ -272,14 +272,14 @@ namespace DiscordBot.Services
             public override string ToString()
             {
                 string blameString = "";
-                blameString +=$"ID: {id}";
-                blameString +=$"Name: {name}";
-                blameString +=$"Path: {path}";
-                blameString +=$"Comment: {comment}";
-                blameString +=$"Urgency: {urgencyDescriptor}";
-                blameString +=$"Line Number: {lineNum}";
-                blameString +=$"Blame Viewed: {blameViewed}";
-                blameString +=$"Blame Complete: {blameComplete}";
+                blameString +=$"ID: {id}\n";
+                blameString +=$"Name: {name}\n";
+                blameString +=$"Path: {path}\n";
+                blameString +=$"Comment: {comment}\n";
+                blameString +=$"Urgency: {urgencyDescriptor}\n";
+                blameString +=$"Line Number: {lineNum}\n";
+                blameString +=$"Blame Viewed: {blameViewed}\n";
+                blameString +=$"Blame Complete: {blameComplete}\n";
                 
                 return blameString;
             }
@@ -326,7 +326,7 @@ namespace DiscordBot.Services
 
                 var commandDict = _commandHandler.ExtractParameterBody(
                     ["id"],
-                    _commandHandler.splitCommand(message.d.content));
+                    message.d.content);
                 // Send the HTTP request
                 HttpResponseMessage response = await backendHTTPClient.GetAsync(baseUrl + $"/api/Blames/blameBegone/{commandDict.GetValueOrDefault("id")}");
 
@@ -530,20 +530,26 @@ namespace DiscordBot.Services
         {
             if (_userStateManager.userStateExists(message.d.author.id) && _userStateManager.getUserState(message.d.author.id).currentState == State.LOGGED_IN)
             {
+                StringContent? httpContent;
 
                 // Set the Authorization header with the JWT token
                 backendHTTPClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _userStateManager.getUserState(message.d.author.id).jwt);
-
+                try{
                 var commandDict = _commandHandler.ExtractParameterBody(
                     (new NewBlameRequest().getKeys()),
-                    _commandHandler.splitCommand(message.d.content));
+                    message.d.content);
 
-                NewBlameRequest newBlameRequest = new NewBlameRequest(commandDict);
+                NewBlameRequest newBlameRequest = new(commandDict);
 
                 // Serialize the request body to JSON
                 var jsonString = JsonSerializer.Serialize(newBlameRequest);
-                var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-
+                 httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+}
+                catch
+                {
+                    await sendMessage(new DiscordMessage($"Sorry! You're input doesn't seem to be correct, please try again."), message.d.channel_id);
+                    return;
+                }
                 // Start loader animation
                 using (var cts = new CancellationTokenSource())
                 {
@@ -566,6 +572,7 @@ namespace DiscordBot.Services
                             errorMessage = await response.Content.ReadAsStringAsync();
                         }
                         Console.WriteLine($"\nError ({response.StatusCode}): {errorMessage}");
+                        await sendMessage(new DiscordMessage($"Sorry! Something seems to have gone wrong."), message.d.channel_id);
                         return;
                     }
 
@@ -574,6 +581,7 @@ namespace DiscordBot.Services
             else
             {
                 Console.WriteLine("JWT token is missing. Please log in first.");
+                await sendMessage(new DiscordMessage($"JWT token is missing. Please log in first."), message.d.channel_id);
             }
         }
 

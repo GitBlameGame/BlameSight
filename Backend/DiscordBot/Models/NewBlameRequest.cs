@@ -8,29 +8,29 @@ namespace DiscordBot.Models
 {
     public class NewBlameRequest
     {
-        string? Path { get; set; }
-        int? LineNum { get; set; }
-        int? Urgency { get; set; }
-        string? Comment { get; set; }
-        string? Branch { get; set; }
+        public string Path { get; set; }
+        public int lineNum { get; set; }
+        public int Urgency { get; set; }
+        public string Comment { get; set; }
+        public string branch { get; set; }
 
         public NewBlameRequest() { }
 
         public NewBlameRequest(Dictionary<string, string> parameters)
         {
-            this.Path = parameters.GetValueOrDefault("Path");
-            this.LineNum = int.Parse(parameters.GetValueOrDefault("LineNum"));
-            this.Urgency = int.Parse(parameters.GetValueOrDefault("Urgency"));
-            this.Comment = parameters.GetValueOrDefault("Comment");
-            this.Branch = parameters.GetValueOrDefault("Branch");
+            this.Path = parameters.GetValueOrDefault("Path".ToLower());
+            this.lineNum = int.Parse(parameters.GetValueOrDefault("LineNum".ToLower()));
+            this.Urgency = int.Parse(parameters.GetValueOrDefault("Urgency".ToLower()));
+            this.Comment = parameters.GetValueOrDefault("Comment".ToLower());
+            this.branch = parameters.GetValueOrDefault("Branch".ToLower());
         }
         public NewBlameRequest(string path, int lineNum, int urgency, string comment, string branch)
         {
             Path = path;
-            LineNum = lineNum;
+            lineNum = lineNum;
             Urgency = urgency;
             Comment = comment;
-            Branch = branch;
+            branch = branch;
         }
 
         public List<string> getKeys()
@@ -44,5 +44,6 @@ namespace DiscordBot.Models
 
             return keys;
         }
+
     }
 }
