@@ -1,4 +1,4 @@
-﻿/*using WebApplication1.Models;
+﻿/*using VeryUsefulServer.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,9 +6,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using static WebApplication1.Services.DiscordClient;
+using static VeryUsefulServer.Services.DiscordClient;
 
-namespace WebApplication1.Services
+namespace VeryUsefulServer.Services
 {
     public class BackendService
     {

@@ -153,8 +153,8 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Publish API
-      working-directory: ./Backend/DiscordBot
+    - name: Publish Bot
+      working-directory: ./Frontend/DiscordBot
       run: dotnet publish -c Release --output ../../bundle/bot/bot
 
     - name: Create ZIP Package

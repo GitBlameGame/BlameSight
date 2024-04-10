@@ -32,7 +32,7 @@ jobs:
     uses: ./.github/workflows/liquibase-cd.yaml  
 
   release-cd:
-    name: "Deploy/Release API and CLI"
+    name: "Deploy/Release API,CLI,BOT"
     needs: database-migration
     secrets: inherit
     uses: ./.github/workflows/release-cd.yaml  
