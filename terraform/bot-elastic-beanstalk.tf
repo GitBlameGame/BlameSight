@@ -80,7 +80,7 @@ resource "aws_elastic_beanstalk_environment" "bot_env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_ENDPOINT"
-    value     = aws_elastic_beanstalk_environment.api_env.endpoint_url
+    value     = aws_elastic_beanstalk_environment.api_env.cname
   }
 }
 
