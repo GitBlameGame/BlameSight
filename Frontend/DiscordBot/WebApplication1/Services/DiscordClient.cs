@@ -1,14 +1,14 @@
-﻿using DiscordBot.Models;
+﻿using VeryUsefulServer.Models;
 
 using System.Net.Http.Headers;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using static DiscordBot.Services.DiscordClient;
+using static VeryUsefulServer.Services.DiscordClient;
 
 
-namespace DiscordBot.Services
+namespace VeryUsefulServer.Services
 {
 
 
@@ -105,7 +105,7 @@ namespace DiscordBot.Services
                 if (response.MessageType == WebSocketMessageType.Text)
                 {
                     string receivedMessage = System.Text.Encoding.UTF8.GetString(buffer.Array, 0, response.Count);
-                    //Console.WriteLine($"Unrefined: {receivedMessage}\n\n\n");
+                    Console.WriteLine($"Unrefined: {receivedMessage}\n\n\n");
                     try
                     {
 
