@@ -15,7 +15,7 @@ namespace VeryUsefulServer.Services
     public class DiscordClient
     {
         static string gitHubLoginUrl = "https://github.com/login/device";
-        static string baseUrl = Environment.GetEnvironmentVariable("API_ENDPOINT");
+        static string baseUrl = "http://"+Environment.GetEnvironmentVariable("API_ENDPOINT");
 
         private readonly HttpClient discordHTTPClient;
         private readonly HttpClient backendHTTPClient;
