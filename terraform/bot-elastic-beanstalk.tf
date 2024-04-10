@@ -74,7 +74,7 @@ resource "aws_elastic_beanstalk_environment" "bot_env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "JWT_SECRET_KEY"
+    name      = "DISCORD_BOT_TOKEN"
     value     = data.aws_secretsmanager_secret_version.discord_bot_token.secret_string
   }
   setting {
