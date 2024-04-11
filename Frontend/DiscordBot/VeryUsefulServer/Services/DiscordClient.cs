@@ -261,15 +261,21 @@ namespace VeryUsefulServer.Services
 
             commands += "╔══════════════════════════════ Help Screen ══════════════════════════════╗\n";
             commands += "║                                                                         ║\n";
-            commands += "║ blame help            Display this help screen.                         ║\n";
-            commands += "║ blame login           Login to BlameSight.                              ║\n";
-            commands += "║ blame new             Blame a user on a GitHub repository.              ║\n";
-            commands += "║ blame byMe            View blames where you were the author.            ║\n";
-            commands += "║ blame atMe            View open blames that you initiated.              ║\n";
-            commands += "║ blame begoneBlame     Mark a blame as resolved.                         ║\n";
-            commands += "║ blame shame           Shows the blame leaderboard (of shame).           ║\n";
+            commands += "║ /blame help            Display this help screen.                        ║\n";
+            commands += "║ /blame login           Login to BlameSight.                             ║\n";
+            commands += "║ /blame new             Blame a user on a GitHub repository.             ║\n";
+            commands += "║                        -> -path Owner/Repo/File <\"string\">              ║\n";
+            commands += "║                        -> -lineNum Line number of code to blame <int>   ║\n";
+            commands += "║                        -> -Comment Blame comment <\"string\">             ║\n";
+            commands += "║                        -> -Urgency 1 to 5                               ║\n";
+            commands += "║                        -> -branch Branch name <\"string\">                ║\n";
+            commands += "║ /blame byMe            View blames where you were the author.           ║\n";
+            commands += "║ /blame atMe            View open blames that you initiated.             ║\n";
+            commands += "║ /blame begone          Mark a blame as resolved.                        ║\n";
+            commands += "║                        -> -id  ID of Blame <int>                        ║\n";
+            commands += "║ /blame shame           Shows the blame leaderboard (of shame).          ║\n";
             commands += "║                                                                         ║\n";
-            commands += "║Commands are case ... SENSITIVE.                                         ║\n";
+            commands += "║        Commands are case ... SENSITIVE.                                 ║\n";
             commands += "╚═════════════════════════════════════════════════════════════════════════╝\n";
 
             await sendMessage(new DiscordMessage($"```{commands}```"), channelId);
