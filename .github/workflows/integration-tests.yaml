@@ -25,5 +25,5 @@ jobs:
       - name: Uses Newman to run Postman tests
         uses: matt-ball/newman-action@master
         with:
-          collection: ./postman/BlameSight.postman_collection.json
+          collection: ./postman/collection.json
           environment: environment.json

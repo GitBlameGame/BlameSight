@@ -237,7 +237,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"Path\": \"GitBlameGame/BlameSight/Backend/BlameSightBackend/BlameSightBackend/Utils/JWTUtils.cs\",\r\n  \"Comment\": \"Why tab spaces?\",\r\n  \"Urgency\" : 2,\r\n  \"lineNum\" : 3,\r\n  \"branch\" : \"main\"\r\n}",
+					"raw": "{\r\n  \"Path\": \"GitBlameGame/BlameSight/Backend/BlameSightBackend/BlameSightBackend/Controllers/HealthCheck.cs\",\r\n  \"Comment\": \"TESTPOSTMAN\",\r\n  \"Urgency\" : 5,\r\n  \"lineNum\" : 3,\r\n  \"branch\" : \"main\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -276,10 +276,11 @@
 							"    \r",
 							"    // Iterate over each object in the response array\r",
 							"    responseBody.forEach(function (item) {\r",
-							"        if (item.path === \"GitBlameGame/BlameSight/main/Backend/BlameSightBackend/BlameSightBackend/Controllers/HealthCheck.cs\" &&\r",
+							"        if (\r",
 							"            item.comment === \"TESTPOSTMAN\" &&\r",
 							"            item.lineNum === 3) {\r",
 							"            isObjectFound = true;\r",
+							"            pm.environment.set(\"savedId\", item.id);\r",
 							"        }\r",
 							"    });\r",
 							"    \r",
@@ -334,66 +335,6 @@
 		},
 		{
 			"name": "Begon Blame",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"  pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"pm.test(\"Response body contains 'Blame successfully closed😊'\", function () {\r",
-							"    pm.expect(pm.response.text()).to.include(\"Blame successfully closed😊\");\r",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "bearer {{token}}",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"Path\": \"GitBlameGame/BlameSight/Backend/BlameSightBackend/BlameSightBackend/Utils/JWTUtils.cs\",\r\n  \"Comment\": \"Why tab spaces?\",\r\n  \"Urgency\" : 2,\r\n  \"lineNum\" : 3,\r\n  \"branch\" : \"main\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{AWSURL}}/api/Blames/blameBegone/{{savedId}}",
-					"host": [
-						"{{AWSURL}}"
-					],
-					"path": [
-						"api",
-						"Blames",
-						"blameBegone",
-						"{{savedId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Test",
 			"event": [
 				{
 					"listen": "test",
