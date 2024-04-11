@@ -1,8 +1,5 @@
-﻿using BlameSightBackend.Models;
-using BlameSightBackend.Services;
-using Microsoft.AspNetCore.Identity.Data;
+﻿using BlameSightBackend.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -17,7 +14,7 @@ namespace BlameSightBackend.Controllers
     {
         private IConfiguration _config = config;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-        private readonly UserService _userService=userService;
+        private readonly UserService _userService = userService;
 
 
         [HttpGet]
@@ -25,8 +22,6 @@ namespace BlameSightBackend.Controllers
         {
             Console.WriteLine(Authorization);
             var user = GetUserNameFromGithub(Authorization).GetAwaiter().GetResult();
-            //your logic for login process
-            //If login usrename and password are correct then proceed to generate token
 
             if (user == null)
             {
@@ -37,7 +32,7 @@ namespace BlameSightBackend.Controllers
                 new Claim("Name",user),
                 new Claim("Token", Authorization)
             };
-            var userID= _userService.GetOrAddUserDB(user);
+            var userID = _userService.GetOrAddUserDB(user);
             var key = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? "";
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -72,6 +67,6 @@ namespace BlameSightBackend.Controllers
             else { return null; }
 
         }
-       
+
     }
 }

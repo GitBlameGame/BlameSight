@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace BlameSightBackend.Utils
+﻿namespace BlameSightBackend.Utils
 {
     public static class RepoUtils
     {

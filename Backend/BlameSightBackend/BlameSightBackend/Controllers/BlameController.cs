@@ -1,15 +1,9 @@
 ﻿using BlameSightBackend.Models;
-using BlameSightBackend.Models.Db;
 using BlameSightBackend.Services;
 using BlameSightBackend.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
-using System.Security.Claims;
-using System.Security.Principal;
 using System.Text.Json;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BlameSightBackend.Controllers
 {

@@ -9,14 +9,14 @@ namespace BlameSightBackend.Services
 
         public async Task<int> GetOrAddRepoDB(string RepoName, string RepoOwner)
         {
-            var repoOwnerId=await GetOrAddRepOwnerDB(RepoOwner);
-            var Repo = await _dbContext.Repos.FirstOrDefaultAsync(u => u.RepoName == RepoName && u.RepoOwnerId==repoOwnerId);
+            var repoOwnerId = await GetOrAddRepOwnerDB(RepoOwner);
+            var Repo = await _dbContext.Repos.FirstOrDefaultAsync(u => u.RepoName == RepoName && u.RepoOwnerId == repoOwnerId);
             if (Repo == null)
             {
                 var newRepo = new Repo
                 {
                     RepoName = RepoName,
-                    RepoOwnerId=repoOwnerId,
+                    RepoOwnerId = repoOwnerId,
                 };
                 _dbContext.Repos.Add(newRepo);
                 await _dbContext.SaveChangesAsync();

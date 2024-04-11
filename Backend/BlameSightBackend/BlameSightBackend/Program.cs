@@ -4,14 +4,11 @@ using BlameSightBackend.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
-using System.Net.Http;
 using System.Text;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
-// Add services to the container.
+
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -28,15 +25,12 @@ builder.Services.AddAuthentication(x =>
         ValidIssuer = config["JwtSettings:Issuer"],
         ValidAudience = config["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY"))),
-
-
     };
 });
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(config.GetConnectionString("DBConnectionString")));
 builder.Services.AddDbContext<BlameDbContext>(options => options.UseNpgsql(DbUtils.getConnectionString()));
 builder.Services.AddHttpClient("GitHub", httpClient =>
 {
@@ -52,7 +46,6 @@ builder.Services.AddScoped<BlameService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 app.UseAuthentication();
 app.UseAuthorization();
 
