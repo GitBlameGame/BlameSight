@@ -81,8 +81,8 @@
         Console.WriteLine("║ blame help            Display this help screen.                         ║");
         Console.WriteLine("║ blame login           Login to BlameSight.                              ║");
         Console.WriteLine("║ blame new             Blame a user on a GitHub repository.              ║");
-        Console.WriteLine("║ blame byme            View blames where you were the author.            ║");
-        Console.WriteLine("║ blame atme            View open blames that you initiated.              ║");
+        Console.WriteLine("║ blame byMe            View blames where you were the author.            ║");
+        Console.WriteLine("║ blame atMe            View open blames that you initiated.              ║");
         Console.WriteLine("║ blame begone          Mark a blame as resolved.                         ║");
         Console.WriteLine("║ blame shame           View this week's board of shame.                  ║");
         Console.WriteLine("║ clear                 Clear the terminal                                ║");
