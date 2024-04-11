@@ -1,39 +1,6 @@
 using BlameSightBackend.Models;
 using BlameSightBackend.Utils;
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
-
-/*
-
-The basic building blocks for a graphql query are fields.
-
-To create a query with this implementation you'll need to do the following:
-
-Create your GraphQL fields you would like to query, this includes nested ones (via the GraphObject):
-- eg Simple single field:
-      GraphField simple = new("firstname");
-- eg Attributed field (filtered):
-      Attributes attr = new();
-      attr.add("filtername", "filtervalue");
-      GraphField example = new("fieldname", attributes: attr)
--eg Nested field:
-      GraphField nestedField = new("firstname");
-      GraphObject nestedObject = new([nestedField]);
-      Attributes attr = new();
-      attr.add("filtername", "filtervalue");
-      GraphField example = new("fieldname", attributes: attr, graphObject: nestedObject)
-
-
-Then simply create a GraphQuery class and add your fields to it:
-      GraphQuery query = new();
-      query.addField(example); // using the example field from above
-
-Now when the ToString method is called on the GraphQuery class you'll be able to pass it to the GraphQLClient.SendQueryAsync function.
-*/
 
 public class GraphQLClient
 {

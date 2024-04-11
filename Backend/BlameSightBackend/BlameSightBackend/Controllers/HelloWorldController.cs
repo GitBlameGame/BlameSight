@@ -12,20 +12,17 @@ namespace BlameSightBackend.Controllers
         [HttpGet]
         public IActionResult GetHelloWorld()
         {
-            // Extract the username claim from the JWT
+        
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             if (identity != null)
             {
-                // Assuming the claim type for the username is ClaimTypes.Name
                 var usernameClaim = identity.FindFirst("Name")?.Value;
                 if (usernameClaim != null)
                 {
-                    // Use the usernameClaim as needed for your logic
                     return Ok($"Hello, {usernameClaim}!");
                 }
             }
 
-            // If the claim is not found or the user is not authenticated
             return Unauthorized("User is not authenticated.");
         }
     }

@@ -7,6 +7,7 @@ namespace BlameSightBackend.Services
     public class BlameService(BlameDbContext dbContext)
     {
         private readonly BlameDbContext _dbContext = dbContext;
+        private readonly string _githubURL = "https://github.com/";
 
         public async Task<int> AddBlame(int blamerID, int blamedID, string path, int repoID, string message, int lineNumber, int urgency)
         {
@@ -36,12 +37,12 @@ namespace BlameSightBackend.Services
                                     .Include(b => b.Repo)
                                     .ThenInclude(r => r.RepoOwner)
                                     .Include(b => b.UrgencyDescriptor)
-                                   .Where(b => b.BlamerId == blamerID && !b.BlameComplete)
+                                    .Where(b => b.BlamerId == blamerID && !b.BlameComplete)
                                    .Select(b => new viewBlame
                                    {
                                        Id = b.BlameId,
                                        Name = b.Blamed.UserName,
-                                       Path = $"{b.Repo.RepoOwner.RepoOwnerName}/{b.Repo.RepoName}/{b.BlamePath}",
+                                       Path = $"{_githubURL}{b.Repo.RepoOwner.RepoOwnerName}/{b.Repo.RepoName}/blob/{b.BlamePath}#L{b.BlameLine}",
                                        LineNum = b.BlameLine,
                                        UrgencyDescriptor = b.UrgencyDescriptor.UrgencyDescriptorName,
                                        blameComplete = b.BlameComplete,
@@ -61,7 +62,8 @@ namespace BlameSightBackend.Services
                                    .Include(b => b.Repo)
                                    .ThenInclude(r => r.RepoOwner)
                                    .Include(b => b.UrgencyDescriptor)
-                                   .Where(b => b.BlamedId == blamedD && !b.BlameComplete).ToListAsync();
+                                   .Where(b => b.BlamedId == blamedD && !b.BlameComplete)
+                                   .ToListAsync();
             blamelist.ForEach(b => b.BlameViewed = true);
             await _dbContext.SaveChangesAsync();
             return blamelist
@@ -69,13 +71,12 @@ namespace BlameSightBackend.Services
                                    {
                                        Id = b.BlameId,
                                        Name = b.Blamer.UserName,
-                                       Path = $"{b.Repo.RepoOwner.RepoOwnerName}/{b.Repo.RepoName}/{b.BlamePath}",
+                                       Path = $"{_githubURL}{b.Repo.RepoOwner.RepoOwnerName}/{b.Repo.RepoName}/blob/{b.BlamePath}#L{b.BlameLine}",
                                        LineNum = b.BlameLine,
                                        UrgencyDescriptor = b.UrgencyDescriptor.UrgencyDescriptorName,
                                        blameComplete = b.BlameComplete,
                                        blameViewed = b.BlameViewed,
                                        Comment = b.BlameMessage
-
                                    }
 
                 )
@@ -85,8 +86,11 @@ namespace BlameSightBackend.Services
         public async Task<bool?> setBlameComplete(int blamerID, int blameID)
         {
             var blame = _dbContext.Blames.Where(b => b.BlameId == blameID).FirstOrDefault();
-            if (blame == null) { return null; }
-            else if (blame.BlamerId != blamerID) { return false; }
+            if (blame == null)
+            {
+                return null;
+            }
+            else if (blame.BlamerId != blamerID)return false;
             blame.BlameComplete = true;
             await _dbContext.SaveChangesAsync();
             return true;
@@ -99,8 +103,8 @@ namespace BlameSightBackend.Services
             .GroupBy(e => e.Blamed)
             .Select(group => new rankUser
             {
-            Name = group.Key.UserName,
-            BlamePoints = group.Sum(e => e.UrgencyDescriptorId)
+                Name = group.Key.UserName,
+                BlamePoints = group.Sum(e => e.UrgencyDescriptorId)
             })
             .OrderByDescending(result => result.BlamePoints)
             .Take(5)
