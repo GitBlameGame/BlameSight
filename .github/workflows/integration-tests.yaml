@@ -18,10 +18,9 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
 
       - name: Download env file
-        working-directory: ./postman
         run: |
-          aws s3 cp s3://263883060207-newman/environment.zip environment.zip
-          unzip environment.zip
+          aws s3 cp s3://263883060207-newman/environment.zip ./postman/environment.zip
+          unzip ./postman/environment.zip
 
       - name: Uses Newman to run Postman tests
         uses: matt-ball/newman-action@master
