@@ -20,7 +20,7 @@ jobs:
       - name: Download env file
         working-directory: ./postman
         run: |
-          aws s3 cp s3://263883060207-newman environment.zip 
+          aws s3 cp s3://263883060207-newman/environment.zip environment.zip
           unzip environment.zip
 
       - name: Uses Newman to run Postman tests
