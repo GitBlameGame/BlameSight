@@ -14,5 +14,25 @@
             return (repositoryOwner, repositoryName, filePath);
         }
 
+        public static string GetGitHubPathWithoutBranch(string url)
+        {
+            string gitHubDomain = "https://github.com/";
+            string blobPart = "/blob/";
+
+            if (url.StartsWith(gitHubDomain))
+            {
+                url = url.Substring(gitHubDomain.Length);
+            }
+
+            int blobIndex = url.IndexOf(blobPart);
+            if (blobIndex != -1)
+            {
+                int nextSlashIndex = url.IndexOf('/', blobIndex + blobPart.Length);
+                url = url.Substring(0, blobIndex) + url.Substring(nextSlashIndex);
+            }
+            url = url.Replace("%20", " ");
+            return url;
+        }
+
     }
 }
