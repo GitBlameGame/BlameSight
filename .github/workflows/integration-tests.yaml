@@ -1,0 +1,29 @@
+name: Integration tests
+
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{secrets.AWS_ASSUME_ROLE}}
+          aws-region: "eu-west-1"
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+
+      - name: Download env file
+        run: |
+          aws s3 cp s3://263883060207-newman/environment.zip ./postman/environment.zip
+          unzip ./postman/environment.zip
+
+      - name: Uses Newman to run Postman tests
+        uses: matt-ball/newman-action@master
+        with:
+          collection: ./postman/collection.json
+          environment: environment.json
