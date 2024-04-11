@@ -1,105 +1,22 @@
-﻿using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text;
 
-class UserInput
+class BlameApiClient
 {
+    private readonly HttpClient client;
     static string gitHubLoginUrl = "https://github.com/login/device";
     static string? jwt;
     static string baseUrl = "http://api-env.eba-kcb3b8tc.eu-west-1.elasticbeanstalk.com";
 
-    static async Task Main(string[] args)
+    public BlameApiClient()
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-        HttpClient client = new HttpClient();
-
-        await DisplayGreetingAsync(client);
-        while (true)
-        {
-            string? input = Console.ReadLine()?.ToLower();
-
-            string[] inputParts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            string firstWord = inputParts.Length > 0 ? inputParts[0] : "";
-
-            if (firstWord == "blame")
-            {
-                string command = inputParts.Length > 1 ? inputParts[1] : ""; // Get the second word as the command
-                switch (command)
-                {
-                    case "login":
-                        await Login(client);
-                        break;
-                    case "help":
-                        DisplayBlameHelp();
-                        break;
-                    case "newblame":
-                        await NewBlame(client);
-                        break;
-                    case "myblames":
-                        await getMyCreatedBlames(client);
-                        break;
-                    case "openblames":
-                        await getMyOpenBlames(client);
-                        break;
-                    case "begoneblame":
-                        await SetBlameComplete(client);
-                        break;
-                    case "shame":
-                        await GetBlameShame(client);
-                        break;
-                    case "hello":
-                        await GetHelloWorld(client);
-                        break;
-                    default:
-                        Console.WriteLine("Invalid command. Please try again.");
-                        break;
-                }
-            }
-            else if (firstWord == "clear")
-            {
-                Console.Clear();
-                await DisplayGreetingAsync(client);
-            }
-            else
-            {
-                Console.WriteLine("Command must start with 'Blame'. Please try again.");
-            }
-        }
-    }
-    static async Task DisplayGreetingAsync(HttpClient client)
-    {
-        Console.Write("Welcome to BlameSight!\n");
-        Console.WriteLine("For more information, type 'blame help'.\n");
-
-        Console.WriteLine("🔥 This Week's Board of Shame 🔥\n");
-
-        await GetBlameShame(client);
-    }
-    static void DisplayBlameHelp()
-    {
-        Console.WriteLine();
-        Console.WriteLine("╔══════════════════════════════ Help Screen ══════════════════════════════╗");
-        Console.WriteLine("║                                                                         ║");
-        Console.WriteLine("║ blame help            Display this help screen.                         ║");
-        Console.WriteLine("║ blame login           Login to BlameSight.                              ║");
-        Console.WriteLine("║ blame newBlame        Blame a user on a GitHub repository.              ║");
-        Console.WriteLine("║ blame myBlames        View blames where you were the author.            ║");
-        Console.WriteLine("║ blame openBlames      View open blames that you initiated.              ║");
-        Console.WriteLine("║ blame begoneBlame     Mark a blame as resolved.                         ║");
-        Console.WriteLine("║ clear                 Clear the terminal                                ║");
-        Console.WriteLine("║                                                                         ║");
-        Console.WriteLine("║Commands are case insensitive.                                           ║");
-        Console.WriteLine("╚═════════════════════════════════════════════════════════════════════════╝");
+        client = new HttpClient();
     }
 
-
-
-    static async Task Login(HttpClient client)
+    public async Task Login()
     {
-        var deviceCodeResponse = await GetDeviceCode(baseUrl, client);
+        var deviceCodeResponse = await GetDeviceCode(baseUrl);
         string deviceCode = deviceCodeResponse["device_code"];
         string userCode = deviceCodeResponse["user_code"];
 
@@ -117,26 +34,26 @@ class UserInput
         Console.ReadLine();
 
         //Exchange Device Code for Access Token
-        var accessTokenResponse = await ExchangeDeviceCodeForAccessToken(baseUrl, client, deviceCode);
+        var accessTokenResponse = await ExchangeDeviceCodeForAccessToken(baseUrl, deviceCode);
 
         if (!accessTokenResponse.ContainsKey("access_token"))
         {
             Console.WriteLine("Authorization process was not completed. Please try again.");
-            await Login(client); // Restart the login process
+            await Login(); // Restart the login process
             return;
         }
         // Extract access token
         string accessToken = accessTokenResponse["access_token"];
 
         //Use Access Token to obtain JWT
-        var jwtResponse = await GetJwtFromBackend(baseUrl, client, accessToken);
+        var jwtResponse = await GetJwtFromBackend(baseUrl, accessToken);
         jwt = jwtResponse;
         Console.WriteLine("You have successfully logged in to Git Blame!");
 
     }
 
 
-    static async Task<Dictionary<string, string>> GetDeviceCode(string baseUrl, HttpClient client)
+    private async Task<Dictionary<string, string>> GetDeviceCode(string baseUrl)
     {
         var clientId = "Iv1.8586ee55069c437b";
         var response = await client.PostAsync("https://github.com/login/device/code", new StringContent($"client_id={clientId}", System.Text.Encoding.UTF8, "application/x-www-form-urlencoded"));
@@ -145,7 +62,7 @@ class UserInput
         return ParseResponse(responseBody);
     }
 
-    static async Task<Dictionary<string, string>> ExchangeDeviceCodeForAccessToken(string baseUrl, HttpClient client, string deviceCode)
+    private async Task<Dictionary<string, string>> ExchangeDeviceCodeForAccessToken(string baseUrl, string deviceCode)
     {
         var clientId = "Iv1.8586ee55069c437b";
         var grantType = "urn:ietf:params:oauth:grant-type:device_code";
@@ -162,7 +79,7 @@ class UserInput
     }
 
 
-    static async Task<string> GetJwtFromBackend(string baseUrl, HttpClient client, string accessToken)
+    private async Task<string> GetJwtFromBackend(string baseUrl, string accessToken)
     {
         client.DefaultRequestHeaders.Clear();
         client.DefaultRequestHeaders.Add("Authorization", accessToken);
@@ -175,7 +92,7 @@ class UserInput
     }
 
 
-    static Dictionary<string, string> ParseResponse(string response)
+    Dictionary<string, string> ParseResponse(string response)
     {
         var parts = response.Split('&');
         var result = new Dictionary<string, string>();
@@ -190,7 +107,7 @@ class UserInput
         return result;
     }
 
-    static async Task GetHelloWorld(HttpClient client)
+    public async Task GetHelloWorld()
     {
         if (!string.IsNullOrEmpty(jwt))
         {
@@ -216,7 +133,7 @@ class UserInput
         }
     }
 
-    static async Task StartLoader(CancellationToken cancellationToken)
+    async Task StartLoader(CancellationToken cancellationToken)
     {
         Console.Write("Waiting for server response ");
         var loaderChars = new[] { '/', '-', '\\', '|' };
@@ -237,9 +154,7 @@ class UserInput
         Console.WriteLine();
     }
 
-
-
-    static async Task NewBlame(HttpClient client)
+    public async Task NewBlame()
     {
         if (!string.IsNullOrEmpty(jwt))
         {
@@ -248,10 +163,10 @@ class UserInput
 
             // Prompt the user for input
             Console.Write("Enter the path (owner/repo/pathtofile): ");
-            string path = Console.ReadLine();
+            string? path = Console.ReadLine();
 
             Console.Write("Enter the branch: ");
-            string branch = Console.ReadLine();
+            string? branch = Console.ReadLine();
 
             Console.Write("Enter the line number: ");
             int lineNumber;
@@ -268,7 +183,7 @@ class UserInput
             }
 
             Console.Write("Enter the comment: ");
-            string comment = Console.ReadLine();
+            string? comment = Console.ReadLine();
 
             // Prepare the request body
             var content = new
@@ -303,13 +218,13 @@ class UserInput
 
                 if (response.IsSuccessStatusCode)
                 {
-                    string responseBody = await response.Content.ReadAsStringAsync();
+                    string? responseBody = await response.Content.ReadAsStringAsync();
                     Console.WriteLine($"\nServer response: {responseBody}");
                 }
                 else
                 {
                     // Print out the detailed error reason if available
-                    string errorMessage = response.ReasonPhrase; // Default to the reason phrase
+                    string? errorMessage = response.ReasonPhrase; // Default to the reason phrase
                     if (response.Content != null)
                     {
                         errorMessage = await response.Content.ReadAsStringAsync();
@@ -326,7 +241,7 @@ class UserInput
         }
     }
 
-    static async Task getMyCreatedBlames(HttpClient client)
+    public async Task getMyCreatedBlames()
     {
         if (!string.IsNullOrEmpty(jwt))
         {
@@ -351,28 +266,31 @@ class UserInput
 
                 if (response.IsSuccessStatusCode)
                 {
-                    string responseBody = await response.Content.ReadAsStringAsync();
+                    string? responseBody = await response.Content.ReadAsStringAsync();
                     // Deserialize the JSON response into a list of Blame objects
                     var blames = JsonSerializer.Deserialize<List<Blame>>(responseBody);
 
                     Console.WriteLine("\nBlames:");
-                    foreach (var blame in blames)
+                    if (blames != null)
                     {
-                        Console.WriteLine($"ID: {blame.id}");
-                        Console.WriteLine($"Name: {blame.name}");
-                        Console.WriteLine($"Path: {blame.path}");
-                        Console.WriteLine($"Comment: {blame.comment}");
-                        Console.WriteLine($"Urgency: {blame.urgencyDescriptor}");
-                        Console.WriteLine($"Line Number: {blame.lineNum}");
-                        Console.WriteLine($"Blame Viewed: {blame.blameViewed}");
-                        Console.WriteLine($"Blame Complete: {blame.blameComplete}");
-                        Console.WriteLine();
+                        foreach (var blame in blames)
+                        {
+                            Console.WriteLine($"ID: {blame.id}");
+                            Console.WriteLine($"Name: {blame.name}");
+                            Console.WriteLine($"Path: {blame.path}");
+                            Console.WriteLine($"Comment: {blame.comment}");
+                            Console.WriteLine($"Urgency: {blame.urgencyDescriptor}");
+                            Console.WriteLine($"Line Number: {blame.lineNum}");
+                            Console.WriteLine($"Blame Viewed: {blame.blameViewed}");
+                            Console.WriteLine($"Blame Complete: {blame.blameComplete}");
+                            Console.WriteLine();
+                        }
                     }
                 }
                 else
                 {
                     // Print out the detailed error reason if available
-                    string errorMessage = response.ReasonPhrase; // Default to the reason phrase
+                    string? errorMessage = response.ReasonPhrase; // Default to the reason phrase
                     if (response.Content != null)
                     {
                         errorMessage = await response.Content.ReadAsStringAsync();
@@ -389,7 +307,7 @@ class UserInput
         }
     }
 
-    static async Task getMyOpenBlames(HttpClient client)
+    public async Task getMyOpenBlames()
     {
         if (!string.IsNullOrEmpty(jwt))
         {
@@ -414,7 +332,7 @@ class UserInput
 
                 if (response.IsSuccessStatusCode)
                 {
-                    string responseBody = await response.Content.ReadAsStringAsync();
+                    string? responseBody = await response.Content.ReadAsStringAsync();
                     // Deserialize the JSON response into a list of Blame objects
                     if (responseBody.Contains("You have no pending blames"))
                     {
@@ -426,23 +344,28 @@ class UserInput
                     var blames = JsonSerializer.Deserialize<List<Blame>>(responseBody);
 
                     Console.WriteLine("\nBlames:");
-                    foreach (var blame in blames)
+                    if (blames != null)
                     {
-                        Console.WriteLine($"ID: {blame.id}");
-                        Console.WriteLine($"Name: {blame.name}");
-                        Console.WriteLine($"Path: {blame.path}");
-                        Console.WriteLine($"Comment: {blame.comment}");
-                        Console.WriteLine($"Urgency: {blame.urgencyDescriptor}");
-                        Console.WriteLine($"Line Number: {blame.lineNum}");
-                        Console.WriteLine($"Blame Viewed: {blame.blameViewed}");
-                        Console.WriteLine($"Blame Complete: {blame.blameComplete}");
-                        Console.WriteLine();
+
+                        foreach (var blame in blames)
+                        {
+                            Console.WriteLine($"ID: {blame.id}");
+                            Console.WriteLine($"Name: {blame.name}");
+                            Console.WriteLine($"Path: {blame.path}");
+                            Console.WriteLine($"Comment: {blame.comment}");
+                            Console.WriteLine($"Urgency: {blame.urgencyDescriptor}");
+                            Console.WriteLine($"Line Number: {blame.lineNum}");
+                            Console.WriteLine($"Blame Viewed: {blame.blameViewed}");
+                            Console.WriteLine($"Blame Complete: {blame.blameComplete}");
+                            Console.WriteLine();
+                        }
                     }
+
                 }
                 else
                 {
                     // Print out the detailed error reason if available
-                    string errorMessage = response.ReasonPhrase; // Default to the reason phrase
+                    string? errorMessage = response.ReasonPhrase; // Default to the reason phrase
                     if (response.Content != null)
                     {
                         errorMessage = await response.Content.ReadAsStringAsync();
@@ -459,7 +382,7 @@ class UserInput
         }
     }
 
-    static async Task SetBlameComplete(HttpClient client)
+    public async Task SetBlameComplete()
     {
         if (!string.IsNullOrEmpty(jwt))
         {
@@ -479,13 +402,13 @@ class UserInput
             // Check if the request was successful
             if (response.IsSuccessStatusCode)
             {
-                string responseBody = await response.Content.ReadAsStringAsync();
+                string? responseBody = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Server response: {responseBody}");
             }
             else
             {
                 // Print out the detailed error reason if available
-                string errorMessage = response.ReasonPhrase; // Default to the reason phrase
+                string? errorMessage = response.ReasonPhrase; // Default to the reason phrase
                 if (response.Content != null)
                 {
                     errorMessage = await response.Content.ReadAsStringAsync();
@@ -499,7 +422,7 @@ class UserInput
             Console.WriteLine("JWT token is missing. Please log in first.");
         }
     }
-    static async Task GetBlameShame(HttpClient client)
+    public async Task GetBlameShame()
 
     {
         try
@@ -508,15 +431,17 @@ class UserInput
 
             if (response.IsSuccessStatusCode)
             {
-                string responseBody = await response.Content.ReadAsStringAsync();
+                string? responseBody = await response.Content.ReadAsStringAsync();
 
                 var blameShame = JsonSerializer.Deserialize<RankUser[]>(responseBody);
-
-                foreach (var user in blameShame)
+                if (blameShame != null)
                 {
-                    Console.WriteLine($"Name: {user.name}, Blame Points: {user.blamePoints}");
+                    foreach (var user in blameShame)
+                    {
+                        Console.WriteLine($"Name: {user.name}, Blame Points: {user.blamePoints}");
+                    }
+                    Console.WriteLine();
                 }
-                Console.WriteLine();
             }
             else
             {
@@ -530,23 +455,4 @@ class UserInput
         }
     }
 
-
-    public class RankUser
-    {
-        public string name { get; set; }
-        public int blamePoints { get; set; }
-    }
-
-    public class Blame
-    {
-        public int id { get; set; }
-        public string name { get; set; }
-        public string path { get; set; }
-        public string comment { get; set; }
-        public string urgencyDescriptor { get; set; }
-        public int lineNum { get; set; }
-        public bool blameViewed { get; set; }
-        public bool blameComplete { get; set; }
-    }
 }
-
