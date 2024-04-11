@@ -60,52 +60,7 @@ namespace VeryUsefulServer.Services
                 );
 
         }
-        // helper thread for heartbeat
-
-        public delegate Task AuthDelegate();
-        public delegate void HTTPResponseDelegate();
-
-        public async Task AuthWrapper(Message message, AuthDelegate action)
-        {
-            if (userStateManager.userStateExists(message.d.author.id) && userStateManager.getUserState(message.d.author.id).currentState == State.LOGGED_IN)
-            {
-                await action();
-            }
-            else
-            {
-                await sendMessage(new DiscordMessage("You are not authenticated, begone! (Please run /blame logic)"), message.d.channel_id);
-
-            }
-        }
-
-        public async Task HTTPResponseWrapper(HttpResponseMessage response, string channelId, HTTPResponseDelegate responseDelegate)
-        {
-            if (response.IsSuccessStatusCode)
-            {
-                // Deserialize the JSON response into a list of Blame objects
-                try
-                {
-                    responseDelegate();
-                }
-                catch
-                {
-                    await sendMessage(new DiscordMessage("Something went wrong with the request!"), channelId);
-                }
-
-
-            }
-            else
-            {
-                // Print out the detailed error reason if available
-                string errorMessage = response.ReasonPhrase; // Default to the reason phrase
-                if (response.Content != null)
-                {
-                    errorMessage = await response.Content.ReadAsStringAsync();
-                }
-                await sendMessage(new DiscordMessage($"\n**Error ({response.StatusCode})**: {errorMessage}"), channelId);
-                return;
-            }
-        }
+        
 
         public async Task<string> sendMessage(DiscordMessage discordMessage, string channelId)
         {

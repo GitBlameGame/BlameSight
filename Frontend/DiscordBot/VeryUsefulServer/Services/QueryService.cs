@@ -7,6 +7,8 @@ using System.Text;
 
 public class QueryService
 {
+    public delegate Task AuthDelegate();
+    public delegate void HTTPResponseDelegate();
     public delegate Task SendMessageDelegate(DiscordMessage message, string channelId);
     HttpClient backendHTTPClient;
     CommandHandler commandHandler;
@@ -227,7 +229,7 @@ public class QueryService
         }
         else
         {
-            await sendMessage(new DiscordMessage("You are not authenticated, begone! (Please run /blame logic)"), message.d.channel_id);
+            await sendMessage(new DiscordMessage("You are not authenticated, begone! (Please run /blame login)"), message.d.channel_id);
 
         }
     }
