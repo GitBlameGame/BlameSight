@@ -21,6 +21,7 @@ namespace BlameSightBackend.Controllers
         {
             var blamer = JWTUtils.GetUsername(HttpContext);
             var token = JWTUtils.GetBearerToken(HttpContext);
+            blameInput.Path=RepoUtils.GetGitHubPathWithoutBranch(blameInput.Path);
             if (blamer == null || token == null)
             {
                 return Unauthorized("JWT Invalid, please login again");
