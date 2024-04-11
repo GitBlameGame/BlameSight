@@ -30,16 +30,16 @@
                     case "help":
                         DisplayBlameHelp();
                         break;
-                    case "newblame":
+                    case "new":
                         await apiClient.NewBlame();
                         break;
-                    case "myblames":
+                    case "byme":
                         await apiClient.getMyCreatedBlames();
                         break;
-                    case "openblames":
+                    case "atme":
                         await apiClient.getMyOpenBlames();
                         break;
-                    case "begoneblame":
+                    case "begone":
                         await apiClient.SetBlameComplete();
                         break;
                     case "shame":
@@ -80,10 +80,10 @@
         Console.WriteLine("║                                                                         ║");
         Console.WriteLine("║ blame help            Display this help screen.                         ║");
         Console.WriteLine("║ blame login           Login to BlameSight.                              ║");
-        Console.WriteLine("║ blame newBlame        Blame a user on a GitHub repository.              ║");
-        Console.WriteLine("║ blame myBlames        View blames where you were the author.            ║");
-        Console.WriteLine("║ blame openBlames      View open blames that you initiated.              ║");
-        Console.WriteLine("║ blame begoneBlame     Mark a blame as resolved.                         ║");
+        Console.WriteLine("║ blame new             Blame a user on a GitHub repository.              ║");
+        Console.WriteLine("║ blame byMe            View blames where you were the author.            ║");
+        Console.WriteLine("║ blame atMe            View open blames that you initiated.              ║");
+        Console.WriteLine("║ blame begone          Mark a blame as resolved.                         ║");
         Console.WriteLine("║ blame shame           View this week's board of shame.                  ║");
         Console.WriteLine("║ clear                 Clear the terminal                                ║");
         Console.WriteLine("║                                                                         ║");
