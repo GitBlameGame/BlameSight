@@ -336,6 +336,17 @@
 				"method": "GET",
 				"header": []
 			},
+			"url": {
+				"raw": "{{AWSURL}}/api/Blames/openBlames",
+				"host": [
+					"{{AWSURL}}"
+				],
+				"path": [
+					"api",
+					"Blames",
+					"openBlames"
+				]
+			},
 			"response": []
 		}
 	]
