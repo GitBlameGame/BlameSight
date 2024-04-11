@@ -140,6 +140,68 @@
 			"response": []
 		},
 		{
+			"name": "View where i am blamed",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"BlameViewed and BlameComplete are boolean values\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    responseData.forEach(function(blame) {\r",
+							"        pm.expect(blame.blameViewed).to.be.a('boolean');\r",
+							"        pm.expect(blame.blameComplete).to.be.a('boolean');\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"LineNum is a non-negative integer\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"    responseData.forEach(function(item) {\r",
+							"        pm.expect(item.lineNum).to.be.a('number').and.to.satisfy((num) => num >= 0, \"LineNum must be a non-negative integer\");\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{AWSURL}}/api/Blames/openBlames",
+					"host": [
+						"{{AWSURL}}"
+					],
+					"path": [
+						"api",
+						"Blames",
+						"openBlames"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "New Blame",
 			"event": [
 				{
@@ -327,25 +389,6 @@
 						"{{savedId}}"
 					]
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "View where i am blamed",
-			"request": {
-				"method": "GET",
-				"header": []
-			},
-			"url": {
-				"raw": "{{AWSURL}}/api/Blames/openBlames",
-				"host": [
-					"{{AWSURL}}"
-				],
-				"path": [
-					"api",
-					"Blames",
-					"openBlames"
-				]
 			},
 			"response": []
 		}
