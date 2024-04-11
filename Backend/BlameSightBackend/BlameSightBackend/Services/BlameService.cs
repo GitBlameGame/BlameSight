@@ -7,6 +7,7 @@ namespace BlameSightBackend.Services
     public class BlameService(BlameDbContext dbContext)
     {
         private readonly BlameDbContext _dbContext = dbContext;
+        private readonly string _githubURL = "https://github.com/";
 
         public async Task<int> AddBlame(int blamerID, int blamedID, string path, int repoID, string message, int lineNumber, int urgency)
         {
@@ -41,7 +42,7 @@ namespace BlameSightBackend.Services
                                    {
                                        Id = b.BlameId,
                                        Name = b.Blamed.UserName,
-                                       Path = $"{b.Repo.RepoOwner.RepoOwnerName}/{b.Repo.RepoName}/{b.BlamePath}",
+                                       Path = $"{_githubURL}{b.Repo.RepoOwner.RepoOwnerName}/{b.Repo.RepoName}/blob/{b.BlamePath}#L{b.BlameLine}",
                                        LineNum = b.BlameLine,
                                        UrgencyDescriptor = b.UrgencyDescriptor.UrgencyDescriptorName,
                                        blameComplete = b.BlameComplete,
@@ -70,7 +71,7 @@ namespace BlameSightBackend.Services
                                    {
                                        Id = b.BlameId,
                                        Name = b.Blamer.UserName,
-                                       Path = $"{b.Repo.RepoOwner.RepoOwnerName}/{b.Repo.RepoName}/{b.BlamePath}",
+                                       Path = $"{_githubURL}{b.Repo.RepoOwner.RepoOwnerName}/{b.Repo.RepoName}/blob/{b.BlamePath}#L{b.BlameLine}",
                                        LineNum = b.BlameLine,
                                        UrgencyDescriptor = b.UrgencyDescriptor.UrgencyDescriptorName,
                                        blameComplete = b.BlameComplete,
