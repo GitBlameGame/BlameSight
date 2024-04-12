@@ -339,7 +339,7 @@ class BlameApiClient
                         Console.WriteLine("You have no pending blames. Congrats! 🎊");
                         return; // Return an empty list
                     }
-                    Console.WriteLine(responseBody);
+                    // Console.WriteLine(responseBody);
 
                     var blames = JsonSerializer.Deserialize<List<Blame>>(responseBody);
 

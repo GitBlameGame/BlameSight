@@ -43,6 +43,10 @@ CodeBlame isn't just about pointing fingers; it's about fostering a culture of c
     - Update JWT_SECRET_KEY to your JWT secret key.
     - Update DISCORD_BOT_TOKEN to your discord bot token.
 
+6. Download CLI release tagged 'latest' under releases on github.
+
+7. Add the Discord bot to your server. URL: https://discord.com/oauth2/authorize?client_id=1225519320864391314
+
 ## Runing fully locally
 This project uses .NET 8
 
