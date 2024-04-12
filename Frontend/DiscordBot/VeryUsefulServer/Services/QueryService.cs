@@ -201,7 +201,8 @@ public class QueryService
             }
             catch
             {
-                await sendMessage(new DiscordMessage($"Sorry! You're input doesn't seem to be correct, please try again."), message.d.channel_id);
+                string commandExample = "`/blame new -path \"Owner/Repo_name/Path_to_file\" -Comment \"Bad code\" -Urgency 1 -lineNum 1 -branch \"main\"`\n";
+                await sendMessage(new DiscordMessage($"***Sorry!*** You're input doesn't seem to be correct, please try again. \n***Example:***\n\n {commandExample}"), message.d.channel_id);
                 return;
             }
             HTTPResponseDelegate hTTPResponseDelegate = async () =>
