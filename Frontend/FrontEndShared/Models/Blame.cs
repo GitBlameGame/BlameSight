@@ -1,4 +1,4 @@
-namespace VeryUsefulServer.Models
+namespace FrontEndShared.Models
 {
 
     public class Blame

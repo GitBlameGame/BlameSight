@@ -1,11 +1,7 @@
-﻿using VeryUsefulServer.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using VeryUsefulServer.Models;
 
-namespace VeryUsefulServer.Services
+namespace FrontEndShared.Services
 {
     public class UserStateManager
     {
